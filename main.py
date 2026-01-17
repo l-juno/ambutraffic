@@ -4,6 +4,10 @@ import pygame
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
 
+# Global variable to hold node positions
+# dictionary of [int, pygame.Vector2]
+NODE_POS = None
+
 ROWS = 1
 COLS = 1
 
@@ -15,42 +19,115 @@ ROAD_THICKNESS = SCREEN_WIDTH // 5
 NODE_RADIUS = 8
 NODE_COLOR = (200, 0, 0)
 TEXT_COLOR = (255, 255, 255)
+CENTER_LINE_COLOR = (255, 200, 0)
 
-def get_nodes():
+
+def build_node_positions():
     halfX = SCREEN_WIDTH // 2
     halfY = SCREEN_HEIGHT // 2
     halfRoad = ROAD_THICKNESS // 2
     offset = ROAD_THICKNESS // 4
 
-    return [
-        (0, (halfX - offset, halfY - (halfRoad+offset))),
-        (1, (halfX + offset, halfY - (halfRoad+offset))),
-        (2, (halfX + (halfRoad+offset), halfY - offset)),
-        (3, (halfX + (halfRoad+offset), halfY + offset)),
-        (4, (halfX + offset, halfY + (halfRoad+offset))),
-        (5, (halfX - offset, halfY + (halfRoad+offset))),
-        (6, (halfX - (halfRoad+offset), halfY + offset)),
-        (7, (halfX - (halfRoad+offset), halfY - offset)),
-    ]
+    return {
+        0: pygame.Vector2(halfX - offset,           halfY - (halfRoad + offset)),
+        1: pygame.Vector2(halfX + offset,           halfY - (halfRoad + offset)),
+        2: pygame.Vector2(halfX + (halfRoad+offset), halfY - offset),
+        3: pygame.Vector2(halfX + (halfRoad+offset), halfY + offset),
+        4: pygame.Vector2(halfX + offset,           halfY + (halfRoad + offset)),
+        5: pygame.Vector2(halfX - offset,           halfY + (halfRoad + offset)),
+        6: pygame.Vector2(halfX - (halfRoad+offset), halfY + offset),
+        7: pygame.Vector2(halfX - (halfRoad+offset), halfY - offset),
+    }
+
+
+# get position of node by its ID
+def getPos(node_id: int) -> pygame.Vector2:
+    return NODE_POS[node_id]
 
 
 def draw_roads(screen):
-    # horizontal road
-    road_rect = pygame.Rect((SCREEN_WIDTH - ROAD_THICKNESS) // 2, 0, ROAD_THICKNESS, SCREEN_HEIGHT)
-    pygame.draw.rect(screen, ROAD_COLOR, road_rect)
-    # vertical road
-    road_rect = pygame.Rect(0, (SCREEN_HEIGHT - ROAD_THICKNESS) // 2, SCREEN_WIDTH, ROAD_THICKNESS)
-    pygame.draw.rect(screen, ROAD_COLOR, road_rect)
+    v_road = pygame.Rect(
+        (SCREEN_WIDTH - ROAD_THICKNESS) // 2,
+        0,
+        ROAD_THICKNESS,
+        SCREEN_HEIGHT
+    )
+    h_road = pygame.Rect(
+        0,
+        (SCREEN_HEIGHT - ROAD_THICKNESS) // 2,
+        SCREEN_WIDTH,
+        ROAD_THICKNESS
+    )
 
-    
+    pygame.draw.rect(screen, ROAD_COLOR, v_road)
+    pygame.draw.rect(screen, ROAD_COLOR, h_road)
+
+    intersection = get_intersection_rect()
+
+    cx = SCREEN_WIDTH // 2
+    cy = SCREEN_HEIGHT // 2
+
+    draw_dashed_line(
+        screen, CENTER_LINE_COLOR,
+        (cx, 0),
+        (cx, intersection.top)
+    )
+
+    draw_dashed_line(
+        screen, CENTER_LINE_COLOR,
+        (cx, intersection.bottom),
+        (cx, SCREEN_HEIGHT)
+    )
+
+    draw_dashed_line(
+        screen, CENTER_LINE_COLOR,
+        (0, cy),
+        (intersection.left, cy)
+    )
+
+    draw_dashed_line(
+        screen, CENTER_LINE_COLOR,
+        (intersection.right, cy),
+        (SCREEN_WIDTH, cy)
+    )
+
+
+
 def draw_nodes(screen, font):
-    for node_id, (x, y) in get_nodes():
-        pygame.draw.circle(screen, NODE_COLOR, (x, y), NODE_RADIUS)
+    # placeholder nodes for easier visualization for now
+    for node_id, pos in NODE_POS.items():
+        pygame.draw.circle(screen, NODE_COLOR, (int(pos.x), int(pos.y)), NODE_RADIUS)
 
         label = font.render(str(node_id), True, TEXT_COLOR)
-        screen.blit(label, (x + 10, y - 10))
+        screen.blit(label, (int(pos.x) + 10, int(pos.y) - 10))
 
 
+
+def get_intersection_rect():
+    return pygame.Rect(
+        (SCREEN_WIDTH - ROAD_THICKNESS) // 2,
+        (SCREEN_HEIGHT - ROAD_THICKNESS) // 2,
+        ROAD_THICKNESS,
+        ROAD_THICKNESS
+    )
+
+def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=4):
+    x1, y1 = start
+    x2, y2 = end
+
+    length = ((x2 - x1)**2 + (y2 - y1)**2) ** 0.5
+    dx = (x2 - x1) / length
+    dy = (y2 - y1) / length
+
+    dist = 0
+    while dist < length:
+        dash_end = min(dist + dash_length, length)
+        sx = x1 + dx * dist
+        sy = y1 + dy * dist
+        ex = x1 + dx * dash_end
+        ey = y1 + dy * dash_end
+        pygame.draw.line(screen, color, (sx, sy), (ex, ey), width)
+        dist += dash_length + gap
 
 
 def main():
@@ -58,6 +135,8 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)
+    global NODE_POS
+    NODE_POS = build_node_positions()
 
     running = True
     while running:
