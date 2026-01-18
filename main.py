@@ -2,6 +2,8 @@ import pygame
 import json
 import argparse
 import math
+import pygame.gfxdraw as gfxdraw
+
 
 from classes.vehicle import Vehicle
 from classes.graph.graph import RoadGraph
@@ -28,6 +30,7 @@ CENTER_LINE_COLOR = (255, 200, 0)
 BLUE = (80, 160, 255)
 
 
+LINE_WIDTH = 2
 NODE_RADIUS = 4
 NODE_COLOR = (200, 0, 0)
 TEXT_COLOR = (255, 255, 255)
@@ -171,19 +174,8 @@ def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=1)
 
 
 
-
-# def draw_corner_arc(screen, p_start: pygame.Vector2, p_end: pygame.Vector2, turn_type, width=2):
-#     # Calculate center of the arc
-
-#     # have right turn and left turn radians
-#     # right turn: (pi to pi/2)
-#     # left turn: (0 to pi/2)
-#     # straight: just line
-
-#     # rectangle for arc is x1
-
 def draw_left_turn(screen, start: pygame.Vector2, end: pygame.Vector2, turn_type: str,
-                     width=5, color=(100, 220, 255)):
+                     width=LINE_WIDTH, color=(100, 220, 255)):
     direction = end - start
     direction.normalize_ip()
 
@@ -206,36 +198,89 @@ def draw_left_turn(screen, start: pygame.Vector2, end: pygame.Vector2, turn_type
         next_pos = (next_t2 * next_t2 * start +
                     2 * next_t * next_t2 * ctrl1 +
                     next_t * next_t * end)
-        pygame.draw.line(screen, color, pos, next_pos, width)
-def draw_right_turn(screen, color, start_pos, end_pos, radius, width=3):
+        pygame.draw.line(screen, BLUE, pos, next_pos, width)
+
+
+def draw_arc(surface, center, radius, start_angle, stop_angle, color):
+    x, y = int(center[0]), int(center[1])
+    r = int(round(radius))
+
+    start_angle = int(round(start_angle % 360))
+    stop_angle  = int(round(stop_angle % 360))
+
+    if start_angle == stop_angle:
+        gfxdraw.circle(surface, x, y, r, color)
+    else:
+        gfxdraw.arc(surface, x, y, r, start_angle, stop_angle, color)
+
+# def draw_right_turn(screen, color, start_pos, end_pos, radius, width=LINE_WIDTH):
+#     direction = get_right_turn_direction(start_pos, end_pos)
+
+#     if direction == "NW":
+#         center = pygame.Vector2(end_pos.x, start_pos.y)
+#         start_angle = 1.5 * math.pi 
+#         end_angle   = 0 
+
+#     elif direction == "EN":
+#         center = pygame.Vector2(start_pos.x, end_pos.y)
+#         start_angle = math.pi       
+#         end_angle   = 1.5 * math.pi  
+
+#     elif direction == "SE": 
+#         center = pygame.Vector2(end_pos.x, start_pos.y)
+#         start_angle = 0.5 * math.pi   
+#         end_angle   = math.pi 
+
+#     elif direction == "WS": 
+#         center = pygame.Vector2(start_pos.x, end_pos.y)
+#         start_angle = 0    
+#         end_angle   = 0.5 * math.pi  
+
+#     else:
+#         return
+
+#     rect = pygame.Rect(center.x - radius, center.y - radius, radius * 2, radius * 2)
+
+#     pygame.draw.arc(screen, color, rect, start_angle, end_angle, width)
+
+
+
+
+def draw_right_turn(screen, color, start_pos, end_pos, radius, width=LINE_WIDTH):
     direction = get_right_turn_direction(start_pos, end_pos)
 
     if direction == "NW":
         center = pygame.Vector2(end_pos.x, start_pos.y)
-        start_angle = 1.5 * math.pi 
-        end_angle   = 0 
+        start_angle = 0
+        end_angle   = 0.5 * math.pi
 
     elif direction == "EN":
         center = pygame.Vector2(start_pos.x, end_pos.y)
-        start_angle = math.pi       
-        end_angle   = 1.5 * math.pi  
+        start_angle = 0.5 * math.pi
+        end_angle   = math.pi
 
-    elif direction == "SE": 
+    elif direction == "SE":
         center = pygame.Vector2(end_pos.x, start_pos.y)
-        start_angle = 0.5 * math.pi   
-        end_angle   = math.pi 
+        start_angle = math.pi
+        end_angle   = 1.5 * math.pi
 
-    elif direction == "WS": 
+    elif direction == "WS":
         center = pygame.Vector2(start_pos.x, end_pos.y)
-        start_angle = 0    
-        end_angle   = 0.5 * math.pi  
+        start_angle = 1.5 * math.pi
+        end_angle   = 0
 
     else:
         return
 
-    rect = pygame.Rect(center.x - radius, center.y - radius, radius * 2, radius * 2)
+    # Convert radians -> degrees for gfxdraw
+    start_deg = math.degrees(start_angle)
+    end_deg   = math.degrees(end_angle)
 
-    pygame.draw.arc(screen, color, rect, start_angle, end_angle, width)
+    # # Draw "thick" arc by drawing multiple 1px arcs around the radius
+    # half = max(0, width // 2)
+    # for dr in range(-half, half + 1):
+    #     draw_arc(screen, center, radius + dr, start_deg, end_deg, color)
+    draw_arc(screen, center, radius, start_deg, end_deg, color)
 
 
 
@@ -260,35 +305,19 @@ def draw_edges(screen, graph):
             start_pos = edge.start.get_pos()
             end_pos = edge.end.get_pos()
 
-            if edge.edge_type in ("left"):
+            if edge.edge_type == "left":
                 draw_left_turn(screen, start_pos, end_pos, edge.edge_type)
+            elif edge.edge_type == "right":
+                radius = abs(end_pos.x - start_pos.x)
+                draw_right_turn(screen, BLUE, start_pos, end_pos, radius, width=LINE_WIDTH)
             else:
                 pygame.draw.line(
                     screen,
                     BLUE,
                     (int(start_pos.x), int(start_pos.y)),
                     (int(end_pos.x), int(end_pos.y)),
-                    3
+                    LINE_WIDTH
                 )
-
-            # pygame.draw.line(
-            #     screen,
-            #     BLUE,
-            #     (int(start_pos.x), int(start_pos.y)),
-            #     (int(end_pos.x), int(end_pos.y)),
-            #     3
-            # )
-
-            if edge.edge_type != "right":
-                continue
-
-            start_pos = edge.start.get_pos()
-            end_pos = edge.end.get_pos()
-
-            # radius that matches your geometry nicely:
-            radius = abs(end_pos.x - start_pos.x)  # works because the turn is a quarter circle
-
-            draw_right_turn(screen, BLUE, start_pos, end_pos, radius, width=3)
 
 
 
