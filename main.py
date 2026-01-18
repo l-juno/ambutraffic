@@ -711,6 +711,19 @@ def main():
         # Draw all vehicles
         for vehicle in vehicles:
             screen.blit(vehicle.image, vehicle.rect)
+            if vehicle.type == "ambulance":
+                # Blink every 300 ms
+                if (pygame.time.get_ticks() // 300) % 2 == 0:
+                    rotated_siren = pygame.transform.rotate(vehicle.siren_image, vehicle.angle)
+
+                    # Rotate the offset around the center
+                    rotated_offset = vehicle.siren_offset.rotate(-vehicle.angle)
+
+                    siren_rect = rotated_siren.get_rect(
+                        center=vehicle.rect.center + rotated_offset
+                    )
+
+                    screen.blit(rotated_siren, siren_rect)
 
         if paused:
             text = pause_font.render(
