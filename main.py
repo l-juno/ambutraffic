@@ -19,7 +19,7 @@ COLS = 1
 ROAD_COLOR = (50, 50, 50)
 BG_COLOR = (30, 30, 30)
 
-ROAD_THICKNESS = SCREEN_WIDTH // 20
+ROAD_THICKNESS = SCREEN_WIDTH // 15
 
 NODE_RADIUS = 4
 NODE_COLOR = (200, 0, 0)
@@ -53,15 +53,28 @@ def build_node_positions():
         6: pygame.Vector2(halfX - (halfRoad+offset), halfY + offset),
         7: pygame.Vector2(halfX - (halfRoad+offset), halfY - offset),
 
-        8: pygame.Vector2(halfX - offset,           0),
-        9: pygame.Vector2(halfX + offset,           0),
-        10: pygame.Vector2(SCREEN_WIDTH, halfY - offset),
-        11: pygame.Vector2(SCREEN_WIDTH, halfY + offset),
-        12: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT),
-        13: pygame.Vector2(halfX - offset,           SCREEN_HEIGHT),
-        14: pygame.Vector2(0, halfY + offset),
-        15: pygame.Vector2(0, halfY - offset),
+        8: pygame.Vector2(halfX - offset,           halfY - (4*halfRoad + offset)),
+        9: pygame.Vector2(halfX + offset,           halfY - (4*halfRoad + offset)),
+        10: pygame.Vector2(halfX + (4*halfRoad+offset), halfY - offset),
+        11: pygame.Vector2(halfX + (4*halfRoad+offset), halfY + offset),
+        12: pygame.Vector2(halfX + offset,           halfY + (4*halfRoad + offset)),
+        13: pygame.Vector2(halfX - offset,           halfY + (4*halfRoad + offset)),
+        14: pygame.Vector2(halfX - (4*halfRoad+offset), halfY + offset),
+        15: pygame.Vector2(halfX - (4*halfRoad+offset), halfY - offset),
 
+        16: pygame.Vector2(halfX - offset,           0),
+        17: pygame.Vector2(halfX + offset,           0),
+        18: pygame.Vector2(SCREEN_WIDTH, halfY - offset),
+        19: pygame.Vector2(SCREEN_WIDTH, halfY + offset),
+        20: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT),
+        21: pygame.Vector2(halfX - offset,           SCREEN_HEIGHT),
+        22: pygame.Vector2(0, halfY + offset),
+        23: pygame.Vector2(0, halfY - offset),
+
+        24: pygame.Vector2(halfX,           halfY - (halfRoad + offset)),
+        25: pygame.Vector2(halfX + (halfRoad+offset), halfY),
+        26: pygame.Vector2(halfX,           halfY + (halfRoad + offset)),
+        27: pygame.Vector2(halfX - (halfRoad+offset), halfY),
     }
 
 
@@ -76,7 +89,7 @@ def draw_nodes(screen, font):
         pygame.draw.circle(screen, NODE_COLOR, (int(pos.x), int(pos.y)), NODE_RADIUS)
 
         label = font.render(str(node_id), True, TEXT_COLOR)
-        screen.blit(label, (int(pos.x) + 10, int(pos.y) - 10))
+        # screen.blit(label, (int(pos.x) + 10, int(pos.y) - 10))
 
 
 
@@ -111,29 +124,29 @@ def draw_roads(screen):
     cx = SCREEN_WIDTH // 2
     cy = SCREEN_HEIGHT // 2
 
-    draw_dashed_line(
-        screen, CENTER_LINE_COLOR,
-        (cx, 0),
-        (cx, intersection.top)
-    )
+    # draw_dashed_line(
+    #     screen, CENTER_LINE_COLOR,
+    #     (cx, 0),
+    #     (cx, intersection.top)
+    # )
 
-    draw_dashed_line(
-        screen, CENTER_LINE_COLOR,
-        (cx, intersection.bottom),
-        (cx, SCREEN_HEIGHT)
-    )
+    # draw_dashed_line(
+    #     screen, CENTER_LINE_COLOR,
+    #     (cx, intersection.bottom),
+    #     (cx, SCREEN_HEIGHT)
+    # )
 
-    draw_dashed_line(
-        screen, CENTER_LINE_COLOR,
-        (0, cy),
-        (intersection.left, cy)
-    )
+    # draw_dashed_line(
+    #     screen, CENTER_LINE_COLOR,
+    #     (0, cy),
+    #     (intersection.left, cy)
+    # )
 
-    draw_dashed_line(
-        screen, CENTER_LINE_COLOR,
-        (intersection.right, cy),
-        (SCREEN_WIDTH, cy)
-    )
+    # draw_dashed_line(
+    #     screen, CENTER_LINE_COLOR,
+    #     (intersection.right, cy),
+    #     (SCREEN_WIDTH, cy)
+    # )
 
 
 
