@@ -1,4 +1,5 @@
 import pygame
+import math
 
 
 SCREEN_WIDTH = 1000
@@ -16,10 +17,11 @@ BG_COLOR = (30, 30, 30)
 
 ROAD_THICKNESS = SCREEN_WIDTH // 5
 
-NODE_RADIUS = 8
+NODE_RADIUS = 4
 NODE_COLOR = (200, 0, 0)
 TEXT_COLOR = (255, 255, 255)
 CENTER_LINE_COLOR = (255, 200, 0)
+BLUE = (80, 160, 255)
 
 
 def build_node_positions():
@@ -37,6 +39,16 @@ def build_node_positions():
         5: pygame.Vector2(halfX - offset,           halfY + (halfRoad + offset)),
         6: pygame.Vector2(halfX - (halfRoad+offset), halfY + offset),
         7: pygame.Vector2(halfX - (halfRoad+offset), halfY - offset),
+
+        8: pygame.Vector2(halfX - offset,           0),
+        9: pygame.Vector2(halfX + offset,           0),
+        10: pygame.Vector2(SCREEN_WIDTH, halfY - offset),
+        11: pygame.Vector2(SCREEN_WIDTH, halfY + offset),
+        12: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT),
+        13: pygame.Vector2(halfX - offset,           SCREEN_HEIGHT),
+        14: pygame.Vector2(0, halfY + offset),
+        15: pygame.Vector2(0, halfY - offset),
+
     }
 
 
@@ -130,6 +142,28 @@ def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=4)
         dist += dash_length + gap
 
 
+
+
+# def draw_corner_arc(screen, p_start: pygame.Vector2, p_end: pygame.Vector2, turn_type, width=2):
+#     # Calculate center of the arc
+
+#     # have right turn and left turn radians
+#     # right turn: (pi to pi/2)
+#     # left turn: (0 to pi/2)
+#     # straight: just line
+
+#     # rectangle for arc is x1
+
+
+
+
+# def draw_edges(screen):
+#     draw_corner_arc(screen, getPos(1), getPos(2), BLUE, width=2)
+
+
+
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -146,6 +180,7 @@ def main():
 
         screen.fill(BG_COLOR)
         draw_roads(screen)
+        # draw_edges(screen)
         draw_nodes(screen, font)
 
         pygame.display.flip()
