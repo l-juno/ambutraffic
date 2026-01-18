@@ -1,6 +1,11 @@
 import math
 import pygame
-
+# for zone
+SCREEN_WIDTH = 1000 
+SCREEN_HEIGHT = 800
+AMBULANCE_ZONE_RADIUS = 300
+ZONE_CENTER_X = SCREEN_WIDTH // 2
+ZONE_CENTER_Y = SCREEN_HEIGHT // 2
 from classes.traffic_light.light_state import LightState
 class Vehicle:
     def __init__(self, route, speed, type: str, traffic_light):
@@ -21,11 +26,23 @@ class Vehicle:
         self.SAFE_GAP = 50
         self.MIN_SPEED = 0.15
 
+        # zone
+        self.isInZone = False
+
+        
+
         self.original_image = pygame.image.load(
             f"assets/{type}.png"
         ).convert_alpha()
         self.image = self.original_image
         self.rect = self.image.get_rect(center=self.position)
+
+    def point_in_circle(self, x, y):
+      self.isInZone = False
+      distance = math.hypot(x - ZONE_CENTER_X, y - ZONE_CENTER_Y)
+      if distance < AMBULANCE_ZONE_RADIUS:
+          self.isInZone = True
+
 
     def update(self, vehicles):
         if self.finished:
@@ -42,9 +59,6 @@ class Vehicle:
 
 
         target = self.route.path[self.current_index + 1]
-
-        # next_node = self.route.nodes[self.current_index + 1]
-        # target = next_node.position
 
         move_vec = target - self.position
         distance = move_vec.length()
@@ -78,6 +92,9 @@ class Vehicle:
 
         speed_now = self.max_speed
 
+        if self.isInZone:
+            speed_now = self.max_speed * 0.5
+
         buffer = 20
         stop_dist = self.STOP_GAP + buffer
         safe_dist = self.SAFE_GAP + buffer
@@ -96,6 +113,7 @@ class Vehicle:
 
         self.rect.center = self.position
 
+        self.point_in_circle(self.position.x, self.position.y)
 
         target_angle = math.degrees(math.atan2(-forward.y, forward.x)) - 90
 
