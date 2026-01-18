@@ -4,6 +4,7 @@ import pygame
 SCREEN_WIDTH = 1000 
 SCREEN_HEIGHT = 800
 AMBULANCE_ZONE_RADIUS = 300
+TRAFFIC_ZONE_RADIUS = 200
 ZONE_CENTER_X = SCREEN_WIDTH // 2
 ZONE_CENTER_Y = SCREEN_HEIGHT // 2
 from classes.traffic_light.light_state import LightState
@@ -27,7 +28,8 @@ class Vehicle:
         self.MIN_SPEED = 0.15
 
         # zone
-        self.isInZone = False
+        self.isInAmbulanceZone = False
+        self.isInTrafficZone = False
 
         
 
@@ -37,12 +39,18 @@ class Vehicle:
         self.image = self.original_image
         self.rect = self.image.get_rect(center=self.position)
 
-    def point_in_circle(self, x, y):
-      self.isInZone = False
+
+    def point_in_ambulance_zone(self, x, y):
+      self.isInAmbulanceZone = False
       distance = math.hypot(x - ZONE_CENTER_X, y - ZONE_CENTER_Y)
       if distance < AMBULANCE_ZONE_RADIUS:
-          self.isInZone = True
+          self.isInAmbulanceZone = True
 
+    def point_in_traffic_zone(self, x, y):
+      self.isInTrafficZone = False
+      distance = math.hypot(x - ZONE_CENTER_X, y - ZONE_CENTER_Y)
+      if distance < TRAFFIC_ZONE_RADIUS:
+          self.isInTrafficZone = True
 
     def update(self, vehicles):
         if self.finished:
@@ -54,8 +62,8 @@ class Vehicle:
         
         if self.get_traffic_light_state() in (LightState.NS_RED, LightState.EW_RED):
             if self.is_facing_target(self.position, self.angle, self.traffic_light.pos):
-                # TODO: make vehicle stop at the node before the traffic light
-                print("placeholder")
+                if self.position == self.route.nodes[2].position:
+                    return
 
 
         target = self.route.path[self.current_index + 1]
@@ -92,7 +100,7 @@ class Vehicle:
 
         speed_now = self.max_speed
 
-        if self.isInZone:
+        if self.isInTrafficZone:
             speed_now = self.max_speed * 0.5
 
         buffer = 20
@@ -113,7 +121,8 @@ class Vehicle:
 
         self.rect.center = self.position
 
-        self.point_in_circle(self.position.x, self.position.y)
+        self.point_in_ambulance_zone(self.position.x, self.position.y)
+        self.point_in_traffic_zone(self.position.x, self.position.y)
 
         target_angle = math.degrees(math.atan2(-forward.y, forward.x)) - 90
 
