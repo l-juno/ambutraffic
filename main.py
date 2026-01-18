@@ -6,6 +6,8 @@ import pygame.gfxdraw as gfxdraw
 
 
 from classes.route.route_map import build_routes
+from classes.traffic_light.light_state import LightState
+from classes.traffic_light.traffic_light import TrafficLight
 from classes.vehicle import Vehicle
 from classes.graph.graph import RoadGraph
 
@@ -22,24 +24,14 @@ COLS = 1
 ROAD_COLOR = (50, 50, 50)
 BG_COLOR = (30, 30, 30)
 
-ROAD_THICKNESS = SCREEN_WIDTH // 10
+ROAD_THICKNESS = SCREEN_WIDTH // 15
 
 NODE_RADIUS = 4
-NODE_COLOR = (200, 0, 0)
+NODE_COLOR = (80, 160, 255)
 TEXT_COLOR = (255, 255, 255)
 CENTER_LINE_COLOR = (255, 200, 0)
 BLUE = (80, 160, 255)
-
-
 LINE_WIDTH = 2
-NODE_RADIUS = 4
-NODE_COLOR = (200, 0, 0)
-TEXT_COLOR = (255, 255, 255)
-CENTER_LINE_COLOR = (255, 200, 0)
-BLUE = (80, 160, 255)
-
-
-
 
 def build_node_positions():
     halfX = SCREEN_WIDTH // 2
@@ -320,8 +312,6 @@ def draw_edges(screen, graph):
                     LINE_WIDTH
                 )
 
-
-
 def load_from_json(path, routes):
     with open(path, "r") as f:
         data = json.load(f)
@@ -360,6 +350,15 @@ def main():
     global NODE_POS
     NODE_POS = build_node_positions()
     graph = RoadGraph(NODE_POS)
+    graph.debug_print()
+    
+    traffic_lights = []
+    traffic_lights.append(TrafficLight((NODE_POS[3][0],NODE_POS[3][1]), LightState.EW_RED))
+    traffic_lights.append(TrafficLight((NODE_POS[7][0],NODE_POS[7][1]), LightState.EW_RED))
+    
+    traffic_lights.append(TrafficLight((NODE_POS[1][0],NODE_POS[1][1]), LightState.NS_GREEN))
+    traffic_lights.append(TrafficLight((NODE_POS[5][0],NODE_POS[5][1]), LightState.NS_GREEN))
+    
     # graph.debug_print()
     routes = build_routes(graph)
     vehicles = load_from_json(args.scenario, routes)
@@ -376,7 +375,11 @@ def main():
         draw_roads(screen)
         draw_edges(screen, graph)
         draw_nodes(screen, font)
-
+        
+        for tl in traffic_lights:
+            tl.draw(screen)
+            tl.update()
+        
         for vehicle in vehicles:
             screen.blit(vehicle.image, vehicle.rect)
             vehicle.update()
