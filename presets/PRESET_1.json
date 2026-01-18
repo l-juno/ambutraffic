@@ -1,0 +1,14 @@
+{
+  "vehicles": [
+    {
+      "type": "car",
+      "position": [500, 350],
+      "speed": 10
+    },
+    {
+      "type": "ambulance",
+      "position": [250, 300],
+      "speed": 10
+    }
+  ]
+}
