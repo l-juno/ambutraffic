@@ -233,7 +233,7 @@ class Vehicle:
                     return
 
         # Left turn yielding logic - wait at the designated wait node (24, 25, 26, 27)
-        if self.is_left_turn and self.left_turn_wait_position is not None:
+        if self.is_left_turn and self.left_turn_wait_position is not None and self.type != "ambulance":
             # If we're already at the wait position, check if we can proceed
             if self.is_at_left_turn_wait():
                 if self.has_opposing_traffic(vehicles):

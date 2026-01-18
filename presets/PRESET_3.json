@@ -18,7 +18,7 @@
     { "type": "car", "route": "S_left",     "speed": 2, "traffic_light_index": 2 },
 
     { "type": "car", "route": "E_right",    "speed": 2, "traffic_light_index": 1 },
-    { "type": "car", "route": "E_straight", "speed": 2, "traffic_light_index": 1 },
+    { "type": "ambulance", "route": "E_straight", "speed": 2, "traffic_light_index": 1 },
     { "type": "car", "route": "E_left",     "speed": 2, "traffic_light_index": 1 },
 
     { "type": "car", "route": "N_straight", "speed": 2, "traffic_light_index": 3 },
