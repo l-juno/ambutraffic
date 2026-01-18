@@ -94,6 +94,27 @@ def draw_nodes(screen, font):
 
         # label = font.render(str(node_id), True, TEXT_COLOR)
         # screen.blit(label, (int(pos.x) , int(pos.y)))
+        
+def draw_vehicle_stats(screen, vehicles):
+    font = pygame.font.SysFont(None, 18)
+
+    line_height = 18
+    x = 10
+    y = screen.get_height() - line_height - 320
+
+    for i, v in enumerate(vehicles):
+        text_str = (
+            f"V{i} | {v.type} | "
+            f"Pos=({v.position.x:.1f},{v.position.y:.1f}) | "
+            f"Speed={v.speed:.2f} | "
+            f"Angle={v.angle:.1f}"
+        )
+
+        text = font.render(text_str, True, (255, 255, 255))
+        screen.blit(text, (x, y))
+        y += line_height
+
+
 
 
 
@@ -438,6 +459,7 @@ def main():
         draw_edges(screen, graph)
         draw_detection_zone(screen)
         draw_nodes(screen, font)
+        draw_vehicle_stats(screen, vehicles)
 
         if not paused:
             for tl in traffic_lights:
