@@ -30,7 +30,17 @@ class Vehicle:
         self.max_speed = speed
         self.speed = speed
 
-        self.angle = 0
+        # Initialize angle based on starting direction
+        if len(route.path) >= 2:
+            start = route.path[0]
+            next_pt = route.path[1]
+            direction = next_pt - start
+            if direction.length() > 0:
+                self.angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
+            else:
+                self.angle = 0
+        else:
+            self.angle = 0
 
         # spacing / safety
         self.LANE_WIDTH = 7
@@ -39,17 +49,14 @@ class Vehicle:
         self.MIN_SPEED = 0.15
 
         # Left turn yielding
-        self.LEFT_TURN_YIELD_DISTANCE = 180  # Distance to check for opposing vehicles
+        self.LEFT_TURN_YIELD_DISTANCE = 180 
         self.is_left_turn = route.id in LEFT_TURN_OPPOSING
         self.opposing_routes = LEFT_TURN_OPPOSING.get(route.id, [])
         
-        # Store the wait node position (nodes 24, 25, 26, 27) for left turns
         self.left_turn_wait_position = None
         if self.is_left_turn and len(route.nodes) > LEFT_TURN_WAIT_NODE_INDEX:
             self.left_turn_wait_position = route.nodes[LEFT_TURN_WAIT_NODE_INDEX].position.copy()
-        
-        # Calculate the path index where the left turn wait point is
-        # This is around where nodes[2] is in the path (after the approach edges)
+      
         self.left_turn_wait_path_index = self._find_left_turn_wait_index()
         
         # Track if we're waiting at the left turn point
@@ -62,7 +69,8 @@ class Vehicle:
         self.original_image = pygame.image.load(
             f"assets/{type}.png"
         ).convert_alpha()
-        self.image = self.original_image
+        # Apply initial rotation to match starting direction
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.position)
     
     def _find_left_turn_wait_index(self):
@@ -122,17 +130,14 @@ class Vehicle:
             if other is self or other.finished:
                 continue
             
-            # check if the other vehicle is on an opposing route
             if other.route.id not in self.opposing_routes:
                 continue
             other_dist_to_center = (other.position - intersection_center).length()
             
-            # If the opposing vehicle is within the yield distance and still has path ahead
             if other_dist_to_center < self.LEFT_TURN_YIELD_DISTANCE:
                 remaining_path = len(other.route.path) - other.current_index
                 total_path = len(other.route.path)
                 
-                # If they're in the first 70% of their route, they're still a threat
                 if remaining_path > total_path * 0.3:
                     return True
         
@@ -187,7 +192,6 @@ class Vehicle:
         
 
         
-        # Red light check - stop at nodes[2] (entry point to intersection)
         if self.get_traffic_light_state() in (LightState.NS_RED, LightState.EW_RED):
             if self.is_facing_target(self.position, self.angle, self.traffic_light.pos):
                 stop_position = self.route.nodes[2].position
@@ -197,7 +201,6 @@ class Vehicle:
                 if dist_to_stop < 10:
                     return
                 
-                # If approaching the stop position, move toward it and stop there
                 if dist_to_stop < 80 and self.current_index <= self._get_node_path_index(2):
                     move_vec = stop_position - self.position
                     if move_vec.length() > 0:
@@ -232,9 +235,7 @@ class Vehicle:
                     self.point_in_traffic_zone(self.position.x, self.position.y)
                     return
 
-        # Left turn yielding logic - wait at the designated wait node (24, 25, 26, 27)
         if self.is_left_turn and self.left_turn_wait_position is not None and self.type != "ambulance":
-            # If we're already at the wait position, check if we can proceed
             if self.is_at_left_turn_wait():
                 if self.has_opposing_traffic(vehicles):
                     # Stay at the wait position
@@ -246,10 +247,7 @@ class Vehicle:
                     # Clear to proceed
                     self.waiting_at_left_turn = False
             
-            # If approaching the wait point and there's opposing traffic,
-            # move to the wait position and stop there
             elif self.is_approaching_left_turn_wait() and self.has_opposing_traffic(vehicles):
-                # Move toward the wait position instead of the normal target
                 move_vec = self.left_turn_wait_position - self.position
                 distance = move_vec.length()
                 
@@ -284,7 +282,6 @@ class Vehicle:
                     self.point_in_ambulance_zone(self.position.x, self.position.y)
                     self.point_in_traffic_zone(self.position.x, self.position.y)
                     
-                    # Update angle
                     target_angle = math.degrees(math.atan2(-forward.y, forward.x)) - 90
                     diff = (target_angle - self.angle + 180) % 360 - 180
                     self.angle += diff * 0.2
