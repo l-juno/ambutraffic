@@ -14,7 +14,7 @@
     },
     {
       "type": "car",
-      "route": "S_right",
+      "route": "S_straight",
       "speed": 2,
       "traffic_light_index": 2
     },

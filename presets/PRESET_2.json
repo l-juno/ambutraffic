@@ -3,7 +3,7 @@
     {
       "type": "ambulance",
       "route": "N_left",
-      "speed": 2
+      "speed": 0.5
     },
     {
       "type": "ambulance",
