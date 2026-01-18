@@ -2,6 +2,7 @@ import pygame
 import json
 import argparse
 import math
+import random
 import pygame.gfxdraw as gfxdraw
 
 
@@ -13,6 +14,52 @@ from classes.graph.graph import RoadGraph
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
+
+ROUTE_TO_TRAFFIC_LIGHT = {
+    "N_straight": 3, "N_right": 3, "N_left": 3,
+    "S_straight": 2, "S_right": 2, "S_left": 2,
+    "E_straight": 1, "E_right": 1, "E_left": 1,
+    "W_straight": 0, "W_right": 0, "W_left": 0,
+}
+
+
+class Button:
+    def __init__(self, x, y, width, height, text, color, hover_color, text_color=(255, 255, 255)):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.color = color
+        self.hover_color = hover_color
+        self.text_color = text_color
+        self.is_hovered = False
+        self.font = pygame.font.SysFont(None, 24)
+    
+    def draw(self, screen):
+        color = self.hover_color if self.is_hovered else self.color
+        pygame.draw.rect(screen, color, self.rect, border_radius=5)
+        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2, border_radius=5)
+        
+        text_surface = self.font.render(self.text, True, self.text_color)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+    
+    def update(self, mouse_pos):
+        self.is_hovered = self.rect.collidepoint(mouse_pos)
+    
+    def is_clicked(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            return self.rect.collidepoint(event.pos)
+        return False
+
+
+def spawn_vehicle(vehicle_type, routes, traffic_lights):
+    """Spawn a new vehicle on a random route."""
+    route_names = list(routes.keys())
+    route_name = random.choice(route_names)
+    route = routes[route_name]
+    traffic_light_index = ROUTE_TO_TRAFFIC_LIGHT[route_name]
+    speed = 2 if vehicle_type == "ambulance" else 3
+    return Vehicle(route, speed, vehicle_type, traffic_lights[traffic_light_index])
+
 
 # Global variable to hold node positions
 # dictionary of [int, pygame.Vector2]
@@ -418,11 +465,38 @@ def main():
     paused = False
     pause_font = pygame.font.SysFont(None, 36)
 
+    # Create UI buttons
+    button_width = 120
+    button_height = 40
+    button_margin = 10
+    button_y = SCREEN_HEIGHT - button_height - button_margin
+    
+    add_car_btn = Button(
+        button_margin, button_y, button_width, button_height,
+        "Add Car", (60, 60, 60), (100, 100, 100)
+    )
+    add_ambulance_btn = Button(
+        button_margin + button_width + button_margin, button_y, button_width + 20, button_height,
+        "Add Ambulance", (180, 60, 60), (220, 80, 80)
+    )
+
     running = True
     while running:
+        mouse_pos = pygame.mouse.get_pos()
+        add_car_btn.update(mouse_pos)
+        add_ambulance_btn.update(mouse_pos)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            elif add_car_btn.is_clicked(event):
+                new_vehicle = spawn_vehicle("car", routes, traffic_lights)
+                vehicles.append(new_vehicle)
+
+            elif add_ambulance_btn.is_clicked(event):
+                new_vehicle = spawn_vehicle("ambulance", routes, traffic_lights)
+                vehicles.append(new_vehicle)
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -440,18 +514,14 @@ def main():
         draw_nodes(screen, font)
 
         if not paused:
-            for tl in traffic_lights:
-                tl.update()
+            traffic_lights[0].update()
 
+            # Update all vehicles
             for vehicle in vehicles[:]:
                 vehicle.update(vehicles)
                 if vehicle.finished:
                     vehicles.remove(vehicle)
 
-        for tl in traffic_lights:
-            tl.draw(screen)
-
-        # add q
         for vehicle in vehicles:
             if vehicle.type == "ambulance":
                 if vehicle.isInAmbulanceZone and vehicle not in ambulance_queue:
@@ -460,41 +530,64 @@ def main():
                     ambulance_queue.remove(vehicle)
         ambulance_queue = [v for v in ambulance_queue if v in vehicles]
 
-        for vehicle in vehicles:
-            if vehicle.isInAmbulanceZone and vehicle.type == "ambulance":
-                pygame.draw.circle(
-                    screen,
-                    GREEN,
-                    (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
-                    AMBULANCE_ZONE_RADIUS,
-                    ZONE_WIDTH
-                )
-                if ambulance_queue and vehicle == ambulance_queue[0]:
-                    for tl in traffic_lights:
-                        if tl == vehicle.traffic_light:
-                            tl.state = LightState.NS_GREEN if tl.id in (1, 2) else LightState.EW_GREEN
-                            tl.timer = 0.0
-                        else: 
-                            tl.state = LightState.NS_RED if tl.id in (1, 2) else LightState.EW_RED
-                            tl.timer = 0.0
+        # Check if any ambulance is in zone
+        ambulance_in_zone = any(v.isInAmbulanceZone and v.type == "ambulance" for v in vehicles)
 
-            elif vehicle.type == "ambulance":
-                if vehicle.traffic_light.id == 1:
-                    traffic_lights[3].state = vehicle.traffic_light.state
-                    traffic_lights[3].timer = vehicle.traffic_light.timer
-
-                elif vehicle.traffic_light.id == 2:
-                    traffic_lights[2].state = vehicle.traffic_light.state
-                    traffic_lights[2].timer = vehicle.traffic_light.timer
-                
-                elif vehicle.traffic_light.id == 0:
-                    traffic_lights[0].state = vehicle.traffic_light.state
-                    traffic_lights[0].timer = vehicle.traffic_light.timer
-                
+        # Apply ambulance priority OR sync lights properly
+        if ambulance_queue and ambulance_in_zone:
+            priority_ambulance = ambulance_queue[0]
+            ambulance_tl_id = priority_ambulance.traffic_light.id
+            for tl in traffic_lights:
+                if tl.id == ambulance_tl_id:
+                    # Give green to ambulance's direction
+                    tl.state = LightState.NS_GREEN if tl.id in (1, 2) else LightState.EW_GREEN
                 else:
-                    traffic_lights[1].state = vehicle.traffic_light.state
-                    traffic_lights[1].timer = vehicle.traffic_light.timer
-        
+                    # Give red to other directions
+                    tl.state = LightState.NS_RED if tl.id in (1, 2) else LightState.EW_RED
+        else:
+            # Sync all lights based on master light (traffic_lights[0])
+            master_state = traffic_lights[0].state
+            
+            # E/W pair (traffic_lights[0] and [1]) - same state
+            traffic_lights[1].state = master_state
+            traffic_lights[1].timer = traffic_lights[0].timer
+            
+            # N/S pair (traffic_lights[2] and [3]) - opposite state
+            # When E/W is green/yellow, N/S is red
+            # When E/W is red, N/S is green
+            if master_state == LightState.EW_GREEN:
+                opposite_state = LightState.NS_RED
+            elif master_state == LightState.EW_YELLOW:
+                opposite_state = LightState.NS_RED
+            elif master_state == LightState.EW_RED:
+                opposite_state = LightState.NS_GREEN
+            elif master_state == LightState.NS_GREEN:
+                opposite_state = LightState.EW_RED
+            elif master_state == LightState.NS_YELLOW:
+                opposite_state = LightState.EW_RED
+            else:  # NS_RED
+                opposite_state = LightState.EW_GREEN
+            
+            traffic_lights[2].state = opposite_state
+            traffic_lights[3].state = opposite_state
+            traffic_lights[2].timer = traffic_lights[0].timer
+            traffic_lights[3].timer = traffic_lights[0].timer
+
+        for tl in traffic_lights:
+            tl.draw(screen)
+
+        # Draw ambulance zone indicator if ambulance is present
+        if ambulance_in_zone:
+            pygame.draw.circle(
+                screen,
+                GREEN,
+                (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
+                AMBULANCE_ZONE_RADIUS,
+                ZONE_WIDTH
+            )
+
+        # Draw all vehicles
+        for vehicle in vehicles:
             screen.blit(vehicle.image, vehicle.rect)
 
         if paused:
@@ -504,6 +597,10 @@ def main():
                 (255, 255, 255)
             )
             screen.blit(text, (20, 20))
+
+        # Draw UI buttons
+        add_car_btn.draw(screen)
+        add_ambulance_btn.draw(screen)
 
         pygame.display.flip()
         clock.tick(60)
