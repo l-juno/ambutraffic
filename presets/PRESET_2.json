@@ -1,29 +1,49 @@
 {
   "vehicles": [
     {
-      "type": "car",
-      "position": [100, 100],
-      "speed": 10
+      "type": "ambulance",
+      "route": "N_left",
+      "speed": 2
+    },
+    {
+      "type": "ambulance",
+      "route": "N_left",
+      "speed": 2
+    },
+    {
+      "type": "ambulance",
+      "route": "N_left",
+      "speed": 2
+    },
+    {
+      "type": "ambulance",
+      "route": "N_left",
+      "speed": 2
     },
     {
       "type": "car",
-      "position": [100, 200],
-      "speed": 10
+      "route": "E_straight",
+      "speed": 2
     },
     {
       "type": "car",
-      "position": [100, 300],
-      "speed": 10
+      "route": "S_straight",
+      "speed": 2
     },
     {
       "type": "car",
-      "position": [100, 400],
-      "speed": 10
+      "route": "W_straight",
+      "speed": 2
     },
     {
       "type": "car",
-      "position": [100, 500],
-      "speed": 10
+      "route": "S_right",
+      "speed": 2
+    },
+    {
+      "type": "car",
+      "route": "E_right",
+      "speed": 2
     }
   ]
 }

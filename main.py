@@ -379,14 +379,14 @@ def main():
         for tl in traffic_lights:
             tl.draw(screen)
             tl.update()
-        
-        for vehicle in vehicles:
-            screen.blit(vehicle.image, vehicle.rect)
-            vehicle.update()
 
         for vehicle in vehicles[:]:
+            vehicle.update(vehicles)
             if vehicle.finished:
                 vehicles.remove(vehicle)
+            else:
+                screen.blit(vehicle.image, vehicle.rect)
+
 
 
         pygame.display.flip()
