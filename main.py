@@ -29,9 +29,14 @@ ROAD_THICKNESS = SCREEN_WIDTH // 10
 NODE_RADIUS = 4
 NODE_COLOR = (80, 160, 255)
 TEXT_COLOR = (255, 255, 255)
-CENTER_LINE_COLOR = (255, 200, 0)
+YELLOW = (255, 200, 0)
 BLUE = (80, 160, 255)
 LINE_WIDTH = 2
+ZONE_COLOR = (255, 80, 80)
+ZONE_RADIUS = 300
+ZONE_WIDTH = 2
+
+
 
 def build_node_positions():
     halfX = SCREEN_WIDTH // 2
@@ -328,7 +333,7 @@ def draw_edges(screen, graph):
                     LINE_WIDTH
                 )
 
-def load_from_json(path, routes):
+def load_from_json(path, routes, traffic_lights):
     with open(path, "r") as f:
         data = json.load(f)
 
@@ -337,12 +342,13 @@ def load_from_json(path, routes):
         route_id = v["route"]
         speed = v["speed"]
         vehicle_type = v.get("type")
+        traffic_light_index = v.get("traffic_light_index")
 
         if route_id not in routes:
             raise ValueError(f"Unknown route '{route_id}' in scenario file")
 
         route = routes[route_id]
-        vehicles.append(Vehicle(route, speed, vehicle_type))
+        vehicles.append(Vehicle(route, speed, vehicle_type, traffic_lights[traffic_light_index]))
 
     return vehicles
 
@@ -355,6 +361,16 @@ def parse_args():
         help="Path to scenario JSON file"
     )
     return parser.parse_args()
+
+def draw_detection_zone(screen):
+    pygame.draw.circle(
+        screen,
+        YELLOW,
+        (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
+        ZONE_RADIUS,
+        ZONE_WIDTH
+    )
+
 
 def main():
     args = parse_args()
@@ -369,15 +385,15 @@ def main():
     graph.debug_print()
     
     traffic_lights = []
-    traffic_lights.append(TrafficLight((NODE_POS[3][0],NODE_POS[3][1]), LightState.EW_RED))
-    traffic_lights.append(TrafficLight((NODE_POS[7][0],NODE_POS[7][1]), LightState.EW_RED))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[3][0],NODE_POS[3][1]), LightState.EW_GREEN))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[7][0],NODE_POS[7][1]), LightState.EW_GREEN))
     
-    traffic_lights.append(TrafficLight((NODE_POS[1][0],NODE_POS[1][1]), LightState.NS_GREEN))
-    traffic_lights.append(TrafficLight((NODE_POS[5][0],NODE_POS[5][1]), LightState.NS_GREEN))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[1][0],NODE_POS[1][1]), LightState.NS_RED))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[5][0],NODE_POS[5][1]), LightState.NS_RED))
     
     # graph.debug_print()
     routes = build_routes(graph)
-    vehicles = load_from_json(args.scenario, routes)
+    vehicles = load_from_json(args.scenario, routes, traffic_lights)
 
     running = True
 
@@ -410,6 +426,7 @@ def main():
 
         draw_roads(screen)
         draw_edges(screen, graph)
+        draw_detection_zone(screen)
         draw_nodes(screen, font)
         
         for tl in traffic_lights:
@@ -418,6 +435,14 @@ def main():
 
         for vehicle in vehicles[:]:
             vehicle.update(vehicles)
+            if vehicle.isInZone == True:
+                pygame.draw.circle(
+                    screen,
+                    ZONE_COLOR,
+                    (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
+                    ZONE_RADIUS,
+                    ZONE_WIDTH
+                )
             if vehicle.finished:
                 vehicles.remove(vehicle)
             else:
