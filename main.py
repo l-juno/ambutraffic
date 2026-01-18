@@ -4,6 +4,7 @@ import argparse
 import math
 
 from classes.vehicle import Vehicle
+from classes.graph.graph import RoadGraph
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 1000
@@ -86,7 +87,6 @@ def get_intersection_rect():
         ROAD_THICKNESS,
         ROAD_THICKNESS
     )
-
 
 
 def draw_roads(screen):
@@ -210,6 +210,8 @@ def main():
     font = pygame.font.SysFont(None, 24)
     global NODE_POS
     NODE_POS = build_node_positions()
+    graph = RoadGraph(NODE_POS)
+    graph.debug_print()
 
     running = True
     while running:
@@ -221,7 +223,6 @@ def main():
         
         
         draw_roads(screen)
-        # draw_edges(screen)
         draw_nodes(screen, font)
 
         for vehicle in vehicles:
