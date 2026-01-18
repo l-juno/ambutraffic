@@ -380,7 +380,6 @@ def draw_detection_zone(screen):
         ZONE_WIDTH
     )
 
-
 def main():
     args = parse_args()
 
@@ -388,82 +387,92 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 24)
+
     global NODE_POS
     NODE_POS = build_node_positions()
     graph = RoadGraph(NODE_POS)
     graph.debug_print()
-    
+
     traffic_lights = []
-    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[3][0],NODE_POS[3][1]), LightState.EW_GREEN))
-    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[7][0],NODE_POS[7][1]), LightState.EW_GREEN))
-    
-    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[1][0],NODE_POS[1][1]), LightState.NS_RED))
-    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[5][0],NODE_POS[5][1]), LightState.NS_RED))
-    
-    # graph.debug_print()
+    traffic_lights.append(
+        TrafficLight(pygame.Vector2(NODE_POS[3][0], NODE_POS[3][1]), LightState.EW_GREEN)
+    )
+    traffic_lights.append(
+        TrafficLight(pygame.Vector2(NODE_POS[7][0], NODE_POS[7][1]), LightState.EW_GREEN)
+    )
+    traffic_lights.append(
+        TrafficLight(pygame.Vector2(NODE_POS[1][0], NODE_POS[1][1]), LightState.NS_RED)
+    )
+    traffic_lights.append(
+        TrafficLight(pygame.Vector2(NODE_POS[5][0], NODE_POS[5][1]), LightState.NS_RED)
+    )
+
     routes = build_routes(graph)
+
+    # initial load
     vehicles = load_from_json(args.scenario, routes, traffic_lights)
 
+    paused = False
+    pause_font = pygame.font.SysFont(None, 36)
+
     running = True
-
-    # while running:
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             running = False
-
-    #     screen.fill(BG_COLOR)
-        
-        
-    #     draw_roads(screen)
-    #     draw_edges(screen, graph)
-    #     draw_nodes(screen, font)
-
-    #     for vehicle in vehicles:
-    #         screen.blit(vehicle.image, vehicle.rect)
-    #         vehicle.update(vehicles)
-
-
-    #     pygame.display.flip()
-    #     clock.tick(60)
-
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        screen.fill(BG_COLOR)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
 
+                elif event.key == pygame.K_r:
+                    paused = False
+                    vehicles = load_from_json(args.scenario, routes, traffic_lights)
+
+        screen.fill(BG_COLOR)
         draw_roads(screen)
         draw_edges(screen, graph)
         draw_detection_zone(screen)
         draw_nodes(screen, font)
-        
+
+        if not paused:
+            for tl in traffic_lights:
+                tl.update()
+
+            for vehicle in vehicles[:]:
+                vehicle.update(vehicles)
+                if vehicle.finished:
+                    vehicles.remove(vehicle)
+
         for tl in traffic_lights:
             tl.draw(screen)
-            tl.update()
 
-        for vehicle in vehicles[:]:
-            vehicle.update(vehicles)
-            if vehicle.isInAmbulanceZone == True:
+        for vehicle in vehicles:
+            if vehicle.isInAmbulanceZone:
                 pygame.draw.circle(
                     screen,
                     ZONE_COLOR,
-                    (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
+                    (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
                     AMBULANCE_ZONE_RADIUS,
                     ZONE_WIDTH
                 )
-            if vehicle.finished:
-                vehicles.remove(vehicle)
-            else:
-                screen.blit(vehicle.image, vehicle.rect)
+            screen.blit(vehicle.image, vehicle.rect)
 
-
+        if paused:
+            text = pause_font.render(
+                "PAUSED (Space = resume, R = reset)",
+                True,
+                (255, 255, 255)
+            )
+            screen.blit(text, (20, 20))
 
         pygame.display.flip()
         clock.tick(60)
 
-
     pygame.quit()
+
+
+
 
 
 
