@@ -80,6 +80,7 @@ YELLOW = (255, 200, 0)
 BLUE = (80, 160, 255)
 RED = (255, 80, 80)
 GREEN = (80, 255, 80)
+WHITE = (255, 255, 255)
 LINE_WIDTH = 2
 ZONE_COLOR = (255, 80, 80)
 AMBULANCE_ZONE_RADIUS = 300
@@ -195,35 +196,111 @@ def draw_roads(screen):
 
     cx = SCREEN_WIDTH // 2
     cy = SCREEN_HEIGHT // 2
+    stoplineLength = ROAD_THICKNESS // 2
 
-    # draw_dashed_line(
-    #     screen, CENTER_LINE_COLOR,
-    #     (cx, 0),
-    #     (cx, intersection.top)
-    # )
+    offsetRoad = 1 * ROAD_THICKNESS // 8
 
-    # draw_dashed_line(
-    #     screen, CENTER_LINE_COLOR,
-    #     (cx, intersection.bottom),
-    #     (cx, SCREEN_HEIGHT)
-    # )
+    draw_dashed_line(
+        screen, YELLOW,
+        (cx+offsetRoad, 0),
+        (cx+offsetRoad, intersection.top - 20)
+    )
 
-    # draw_dashed_line(
-    #     screen, CENTER_LINE_COLOR,
-    #     (0, cy),
-    #     (intersection.left, cy)
-    # )
+    pygame.draw.line(
+        screen,
+        (255, 255, 255),
+        (cx+offsetRoad, intersection.top - 20),
+        (cx+offsetRoad - stoplineLength, intersection.top - 20) , 
+        2
+    )
 
-    # draw_dashed_line(
-    #     screen, CENTER_LINE_COLOR,
-    #     (intersection.right, cy),
-    #     (SCREEN_WIDTH, cy)
-    # )
+    draw_dashed_line_same_lane(
+        screen, WHITE,
+        (cx-offsetRoad, 0),
+        (cx-offsetRoad, intersection.top-20)
+    )
+
+    draw_dashed_line(
+        screen, YELLOW,
+        (cx-offsetRoad, intersection.bottom + 20),
+        (cx-offsetRoad, SCREEN_HEIGHT)
+    )
+
+    pygame.draw.line(
+        screen,
+        (255, 255, 255),
+        (cx-offsetRoad, intersection.bottom + 20),
+        (cx-offsetRoad + stoplineLength, intersection.bottom + 20), 
+        2
+    )
+
+    draw_dashed_line_same_lane(
+        screen, WHITE,
+        (cx+offsetRoad, intersection.bottom + 20),
+        (cx+offsetRoad, SCREEN_HEIGHT)
+    )
+
+    draw_dashed_line(
+        screen, YELLOW,
+        (0, cy-offsetRoad),
+        (intersection.left - 20, cy-offsetRoad)
+    )
+
+    pygame.draw.line(
+        screen,
+        (255, 255, 255),
+        (intersection.left - 20, cy-offsetRoad),
+        (intersection.left - 20, cy-offsetRoad + stoplineLength), 
+        2
+    )
+
+    draw_dashed_line_same_lane(
+        screen, WHITE,
+        (0, cy+offsetRoad),
+        (intersection.left - 20, cy+offsetRoad)
+    )
+
+    draw_dashed_line(
+        screen, YELLOW,
+        (intersection.right + 20, cy+offsetRoad),
+        (SCREEN_WIDTH, cy+offsetRoad)
+    )
+    pygame.draw.line(
+        screen,
+        (255, 255, 255),
+        (intersection.right + 20, cy+offsetRoad),
+        (intersection.right + 20, cy+offsetRoad - stoplineLength), 
+        2
+    )
+
+    draw_dashed_line_same_lane(
+        screen, WHITE,
+        (intersection.right + 20, cy-offsetRoad),
+        (SCREEN_WIDTH, cy-offsetRoad)
+    )
 
 
 
 
-def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=1):
+def draw_dashed_line(screen, color, start, end, dash_length=20, gap=0, width=1):
+    x1, y1 = start
+    x2, y2 = end
+
+    length = ((x2 - x1)**2 + (y2 - y1)**2) ** 0.5
+    dx = (x2 - x1) / length
+    dy = (y2 - y1) / length
+
+    dist = 0
+    while dist < length:
+        dash_end = min(dist + dash_length, length)
+        sx = x1 + dx * dist
+        sy = y1 + dy * dist
+        ex = x1 + dx * dash_end
+        ey = y1 + dy * dash_end
+        pygame.draw.line(screen, color, (sx, sy), (ex, ey), width)
+        dist += dash_length + gap
+
+def draw_dashed_line_same_lane(screen, color, start, end, dash_length=20, gap=15, width=1):
     x1, y1 = start
     x2, y2 = end
 
@@ -629,6 +706,13 @@ def main():
         if paused:
             text = pause_font.render(
                 "PAUSED (Space = resume, R = reset)",
+                True,
+                (255, 255, 255)
+            )
+            screen.blit(text, (20, 20))
+        else:
+            text = pause_font.render(
+                "Press SPACE to pause, R to reset scenario",
                 True,
                 (255, 255, 255)
             )
