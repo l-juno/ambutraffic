@@ -6,8 +6,8 @@ import math
 from classes.vehicle import Vehicle
 from classes.graph.graph import RoadGraph
 
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 800
 
 # Global variable to hold node positions
 # dictionary of [int, pygame.Vector2]
