@@ -199,11 +199,11 @@ def load_from_json(path):
 
     vehicles = []
     for v in data["vehicles"]:
-        position = pygame.Vector2(v["position"][0], v["position"][1])
         speed = v["speed"]
         vehicle_type = v.get("type")
+        vehicle_angle = v.get("angle")
 
-        vehicles.append(Vehicle(position, speed, vehicle_type))
+        vehicles.append(Vehicle(v["route_nodeID"], speed, vehicle_type, vehicle_angle, NODE_POS))
 
     return vehicles
 
@@ -223,12 +223,12 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-    vehicles = load_from_json(args.scenario)
     font = pygame.font.SysFont(None, 24)
     global NODE_POS
     NODE_POS = build_node_positions()
     graph = RoadGraph(NODE_POS)
     graph.debug_print()
+    vehicles = load_from_json(args.scenario)
 
     running = True
     while running:
@@ -245,6 +245,7 @@ def main():
 
         for vehicle in vehicles:
             screen.blit(vehicle.image, vehicle.rect)
+            vehicle.update()
 
         pygame.display.flip()
         clock.tick(60)
