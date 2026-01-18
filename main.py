@@ -175,6 +175,23 @@ def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=1)
 # def draw_edges(screen):
 #     draw_corner_arc(screen, getPos(1), getPos(2), BLUE, width=2)
 
+def draw_edges(screen, graph):
+    for edge_list in graph.adjacency.values():
+        for edge in edge_list:
+            start_pos = edge.start.get_pos()
+            end_pos = edge.end.get_pos()
+
+            if(edge.edge_type == "left" or edge.edge_type == "right"):
+                continue
+
+            pygame.draw.line(
+                screen,
+                BLUE,
+                (int(start_pos.x), int(start_pos.y)),
+                (int(end_pos.x), int(end_pos.y)),
+                3
+            )
+
 
 def load_from_json(path):
     with open(path, "r") as f:
@@ -223,6 +240,7 @@ def main():
         
         
         draw_roads(screen)
+        draw_edges(screen, graph)
         draw_nodes(screen, font)
 
         for vehicle in vehicles:
