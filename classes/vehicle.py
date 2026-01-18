@@ -5,6 +5,7 @@ class Vehicle:
   def __init__(self, route, speed, type: str):
     self.route = route
     self.current_index = 0
+    self.finished = False
     start_node = route.nodes[0]
     self.position = start_node.position.copy()
     
@@ -16,8 +17,12 @@ class Vehicle:
     
     
   def update(self):
+    if self.finished:
+        return
+  
     if self.current_index >= len(self.route.nodes) - 1:
-            return
+        self.finished = True
+        return
 
     current_node = self.route.nodes[self.current_index]
     next_node = self.route.nodes[self.current_index + 1]
@@ -39,5 +44,6 @@ class Vehicle:
     self.angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
     self.image = pygame.transform.rotate(self.original_image, self.angle)
     self.rect = self.image.get_rect(center=self.rect.center)
+
 
     
