@@ -2,9 +2,23 @@
   "vehicles": [
     {
       "type": "ambulance",
-      "route_nodeID": [14, 6, 5, 13],
-      "speed": 2,
-      "angle": 90
+      "route": "N_left",
+      "speed": 2
+    },
+    {
+      "type": "car",
+      "route": "W_straight",
+      "speed": 2
+    },
+    {
+      "type": "car",
+      "route": "S_right",
+      "speed": 2
+    },
+    {
+      "type": "car",
+      "route": "E_right",
+      "speed": 2
     }
   ]
 }
