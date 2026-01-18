@@ -24,7 +24,7 @@ COLS = 1
 ROAD_COLOR = (50, 50, 50)
 BG_COLOR = (30, 30, 30)
 
-ROAD_THICKNESS = SCREEN_WIDTH // 15
+ROAD_THICKNESS = SCREEN_WIDTH // 10
 
 NODE_RADIUS = 4
 NODE_COLOR = (80, 160, 255)
@@ -58,14 +58,14 @@ def build_node_positions():
         14: pygame.Vector2(halfX - (4*halfRoad+offset), halfY + offset),
         15: pygame.Vector2(halfX - (4*halfRoad+offset), halfY - offset),
 
-        16: pygame.Vector2(halfX - offset,           0),
-        17: pygame.Vector2(halfX + offset,           0),
-        18: pygame.Vector2(SCREEN_WIDTH, halfY - offset),
-        19: pygame.Vector2(SCREEN_WIDTH, halfY + offset),
-        20: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT),
-        21: pygame.Vector2(halfX - offset,           SCREEN_HEIGHT),
-        22: pygame.Vector2(0, halfY + offset),
-        23: pygame.Vector2(0, halfY - offset),
+        16: pygame.Vector2(halfX - offset,           0 - offset),
+        17: pygame.Vector2(halfX + offset,           0 - offset),
+        18: pygame.Vector2(SCREEN_WIDTH + offset, halfY - offset),
+        19: pygame.Vector2(SCREEN_WIDTH + offset, halfY + offset),
+        20: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT + offset),
+        21: pygame.Vector2(halfX - offset,           SCREEN_HEIGHT + offset),
+        22: pygame.Vector2(0 - offset, halfY + offset),
+        23: pygame.Vector2(0 - offset, halfY - offset),
 
         24: pygame.Vector2(halfX,           halfY - (halfRoad + offset)),
         25: pygame.Vector2(halfX + (halfRoad+offset), halfY),
@@ -84,8 +84,8 @@ def draw_nodes(screen, font):
     for node_id, pos in NODE_POS.items():
         pygame.draw.circle(screen, NODE_COLOR, (int(pos.x), int(pos.y)), NODE_RADIUS)
 
-        label = font.render(str(node_id), True, TEXT_COLOR)
-        screen.blit(label, (int(pos.x) , int(pos.y)))
+        # label = font.render(str(node_id), True, TEXT_COLOR)
+        # screen.blit(label, (int(pos.x) , int(pos.y)))
 
 
 
@@ -194,17 +194,33 @@ def draw_left_turn(screen, start: pygame.Vector2, end: pygame.Vector2, turn_type
         pygame.draw.line(screen, BLUE, pos, next_pos, width)
 
 
+# def draw_arc(surface, center, radius, start_angle, stop_angle, color):
+#     x, y = int(center[0]), int(center[1])
+#     r = int(round(radius))
+
+#     start_angle = int(round(start_angle % 360))
+#     stop_angle  = int(round(stop_angle % 360))
+
+#     if start_angle == stop_angle:
+#         gfxdraw.circle(surface, x, y, r, color)
+#     else:
+#         gfxdraw.arc(surface, x, y, r, start_angle, stop_angle, color)
+
+
 def draw_arc(surface, center, radius, start_angle, stop_angle, color):
     x, y = int(center[0]), int(center[1])
     r = int(round(radius))
 
-    start_angle = int(round(start_angle % 360))
-    stop_angle  = int(round(stop_angle % 360))
-
-    if start_angle == stop_angle:
-        gfxdraw.circle(surface, x, y, r, color)
+    start_angle = int(round(start_angle)) % 360
+    stop_angle  = int(round(stop_angle)) % 360
+    if stop_angle < start_angle:
+        gfxdraw.arc(surface, x, y, r, start_angle, 359, color)
+        gfxdraw.arc(surface, x, y, r, 0, stop_angle, color)
+    elif stop_angle == start_angle:
+        gfxdraw.arc(surface, x, y, r, start_angle, (start_angle + 1) % 360, color)
     else:
         gfxdraw.arc(surface, x, y, r, start_angle, stop_angle, color)
+
 
 # def draw_right_turn(screen, color, start_pos, end_pos, radius, width=LINE_WIDTH):
 #     direction = get_right_turn_direction(start_pos, end_pos)
@@ -364,14 +380,34 @@ def main():
     vehicles = load_from_json(args.scenario, routes)
 
     running = True
+
+    # while running:
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             running = False
+
+    #     screen.fill(BG_COLOR)
+        
+        
+    #     draw_roads(screen)
+    #     draw_edges(screen, graph)
+    #     draw_nodes(screen, font)
+
+    #     for vehicle in vehicles:
+    #         screen.blit(vehicle.image, vehicle.rect)
+    #         vehicle.update(vehicles)
+
+
+    #     pygame.display.flip()
+    #     clock.tick(60)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         screen.fill(BG_COLOR)
-        
-        
+
         draw_roads(screen)
         draw_edges(screen, graph)
         draw_nodes(screen, font)
@@ -391,6 +427,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+
 
     pygame.quit()
 
