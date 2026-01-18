@@ -29,9 +29,14 @@ ROAD_THICKNESS = SCREEN_WIDTH // 10
 NODE_RADIUS = 4
 NODE_COLOR = (80, 160, 255)
 TEXT_COLOR = (255, 255, 255)
-CENTER_LINE_COLOR = (255, 200, 0)
+YELLOW = (255, 200, 0)
 BLUE = (80, 160, 255)
 LINE_WIDTH = 2
+ZONE_COLOR = (255, 80, 80)
+ZONE_RADIUS = 300
+ZONE_WIDTH = 2
+
+
 
 def build_node_positions():
     halfX = SCREEN_WIDTH // 2
@@ -357,6 +362,16 @@ def parse_args():
     )
     return parser.parse_args()
 
+def draw_detection_zone(screen):
+    pygame.draw.circle(
+        screen,
+        YELLOW,
+        (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
+        ZONE_RADIUS,
+        ZONE_WIDTH
+    )
+
+
 def main():
     args = parse_args()
 
@@ -411,6 +426,7 @@ def main():
 
         draw_roads(screen)
         draw_edges(screen, graph)
+        draw_detection_zone(screen)
         draw_nodes(screen, font)
         
         for tl in traffic_lights:
@@ -419,6 +435,14 @@ def main():
 
         for vehicle in vehicles[:]:
             vehicle.update(vehicles)
+            if vehicle.isInZone == True:
+                pygame.draw.circle(
+                    screen,
+                    ZONE_COLOR,
+                    (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
+                    ZONE_RADIUS,
+                    ZONE_WIDTH
+                )
             if vehicle.finished:
                 vehicles.remove(vehicle)
             else:
