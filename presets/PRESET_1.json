@@ -2,120 +2,23 @@
   "vehicles": [
     {
       "type": "ambulance",
-      "route_nodeID": [22, 14, 6, 5, 13, 21],
-      "speed": 4,
-      "angle": 90
+      "route": "N_left",
+      "speed": 2
     },
     {
       "type": "car",
-      "route_nodeID": [13, 21],
-      "speed": 0.5,
-      "angle": 180
+      "route": "W_straight",
+      "speed": 2
     },
     {
       "type": "car",
-      "route_nodeID": [14, 6, 5, 13, 21],
-      "speed": 2,
-      "angle": 90
+      "route": "S_right",
+      "speed": 2
     },
     {
       "type": "car",
-      "route_nodeID": [22, 14, 27, 1, 9, 17],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [18,10,2,7,15,23],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [20,12,4,3,11,19],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "ambulance",
-      "route_nodeID": [22, 14, 6, 5, 13, 21],
-      "speed": 4,
-      "angle": 90
-    },{
-      "type": "ambulance",
-      "route_nodeID": [22, 14, 6, 5, 13, 21],
-      "speed": 4,
-      "angle": 90
-    },{
-      "type": "ambulance",
-      "route_nodeID": [22, 14, 6, 5, 13, 21],
-      "speed": 4,
-      "angle": 90
-    },{
-      "type": "ambulance",
-      "route_nodeID": [22, 14, 6, 5, 13, 21],
-      "speed": 4,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [10,2,7,15,23],
-      "speed": 1,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [2,7,15,23],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [2,7,15,23],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [2,7,15,23],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [2,7,15,23],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [7,15,23],
-      "speed": 0.5,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [22, 14, 27, 1, 9, 17],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [22, 14, 27, 1, 9, 17],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [22, 14, 27, 1, 9, 17],
-      "speed": 2,
-      "angle": 90
-    },
-    {
-      "type": "car",
-      "route_nodeID": [22, 14, 27, 1, 9, 17],
-      "speed": 2,
-      "angle": 90
+      "route": "E_right",
+      "speed": 2
     }
   ]
 }

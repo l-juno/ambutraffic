@@ -111,109 +111,48 @@ import math
 import pygame
 
 class Vehicle:
-  def __init__(self, route_node_ids, speed, type: str, angle, NODE_POS):
-      # --- driving params ---
-      self.max_speed = float(speed)
-      self.safe_gap = 50      # start slowing when closer than this
-      self.stop_gap = 25      # hard stop when closer than this
-      self.lane_tol = 18      # sideways tolerance for "same lane"
-      self.min_speed = 0.15   # optional: prevents tiny speeds from looking stuck
+  def __init__(self, route, speed, type: str):
+    self.route = route
+    self.current_index = 0
+    self.finished = False
+    start_node = route.nodes[0]
+    self.position = start_node.position.copy()
+    
+    self.speed = speed
+    self.original_image = pygame.image.load(f"assets/{type}.png").convert_alpha()
+    self.image = self.original_image
 
-      # --- route state ---
-      self.route = list(route_node_ids)
-      self.current_index = 0
-      self.finished = False
-      self.NODE_POS = NODE_POS
+    self.rect = self.image.get_rect(center=self.position)
+    
+    
+  def update(self):
+    if self.finished:
+        return
+  
+    if self.current_index >= len(self.route.nodes) - 1:
+        self.finished = True
+        return
 
-      # start position at first node
-      start = self.NODE_POS[self.route[0]]
-      self.position = pygame.Vector2(start.x, start.y)
+    current_node = self.route.nodes[self.current_index]
+    next_node = self.route.nodes[self.current_index + 1]
 
-      # sprite
-      self.angle = angle
-      self.original_image = pygame.image.load(f"assets/{type}.png").convert_alpha()
-      self.image = pygame.transform.rotate(self.original_image, -self.angle)
-      self.rect = self.image.get_rect(center=self.position)
+    target = next_node.position
+    direction = target - self.position
+    distance = direction.length()
 
-  def update(self, vehicles):
-      if self.finished:
-          return
+    if distance < self.speed:
+            self.position = target.copy()
+            self.current_index += 1
+            self.rect.center = self.position
+            return
 
-      # If we're at the last node, we're done
-      if self.current_index >= len(self.route) - 1:
-          self.finished = True
-          return
+    direction = direction.normalize()
+    self.position += direction * self.speed
+    self.rect.center = self.position
+    
+    self.angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
+    self.image = pygame.transform.rotate(self.original_image, self.angle)
+    self.rect = self.image.get_rect(center=self.rect.center)
 
-      # --- PATH FOLLOWING: compute target + forward direction ---
-      next_id = self.route[self.current_index + 1]
-      target_node = self.NODE_POS[next_id]
-      target = pygame.Vector2(target_node.x, target_node.y)
 
-      move_vec = target - self.position
-      dist_to_target = move_vec.length()
-
-      # Snap to the node if we're close
-      SNAP_DIST = 5
-      if dist_to_target < speed_now:
-          self.position = target
-          self.current_index += 1
-          self.rect.center = self.position
-          return
-
-      forward = move_vec.normalize()
-      left = pygame.Vector2(-forward.y, forward.x)
-
-      # --- MOTION CONTROL: find nearest vehicle ahead in same lane ---
-      nearest_ahead_dist = float("inf")
-      nearest_ahead = None
-
-      for other in vehicles:
-          if other is self or other.finished:
-              continue
-
-          to_other = other.position - self.position
-          d = to_other.length()
-          if d <= 0:
-              continue
-
-          # Must be in front
-          if forward.dot(to_other) <= 0:
-              continue
-
-          # Must be roughly in same lane (small sideways offset)
-          side_dist = abs(to_other.dot(left))
-          if side_dist > self.lane_tol:
-              continue
-
-          if d < nearest_ahead_dist:
-              nearest_ahead_dist = d
-              nearest_ahead = other
-
-      # --- choose speed ---
-      speed_now = self.max_speed
-
-      if nearest_ahead is not None:
-          # Use small "physics radii" instead of sprite size
-          buffer = 20  # roughly car length/2 + car length/2; tweak
-
-          stop_dist = self.stop_gap + buffer
-          safe_dist = self.safe_gap + buffer
-
-          if nearest_ahead_dist <= stop_dist:
-              speed_now = 0.0
-          elif nearest_ahead_dist < safe_dist:
-              # slow down smoothly between safe_dist and stop_dist
-              t = (nearest_ahead_dist - stop_dist) / (safe_dist - stop_dist)
-              t = max(0.0, min(1.0, t))
-              speed_now = self.max_speed * t
-              if 0.0 < speed_now < self.min_speed:
-                  speed_now = self.min_speed
-
-      # --- MOVE ---
-      self.position += forward * speed_now
-      self.rect.center = self.position
-
-      # --- ROTATE ---
-      self.angle = math.degrees(math.atan2(-forward.y, forward.x)) - 90
-      self.image = pygame.transform.rotate(self.original_image, self.angle)
-      self.rect = self.image.get_rect(center=self.rect.center)
+    
