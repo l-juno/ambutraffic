@@ -2,22 +2,22 @@
   "vehicles": [
     {
       "type": "ambulance",
+      "route": "S_left",
+      "speed": 2
+    },
+    {
+      "type": "ambulance",
+      "route": "E_left",
+      "speed": 2
+    },
+    {
+      "type": "ambulance",
       "route": "N_left",
       "speed": 2
     },
     {
-      "type": "car",
-      "route": "W_straight",
-      "speed": 2
-    },
-    {
-      "type": "car",
-      "route": "S_right",
-      "speed": 2
-    },
-    {
-      "type": "car",
-      "route": "E_right",
+      "type": "ambulance",
+      "route": "W_left",
       "speed": 2
     }
   ]
