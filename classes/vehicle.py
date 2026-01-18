@@ -1,11 +1,13 @@
 import math
 import pygame
 
+from classes.traffic_light.light_state import LightState
 class Vehicle:
-    def __init__(self, route, speed, type: str):
+    def __init__(self, route, speed, type: str, traffic_light):
         self.route = route
         self.current_index = 0
         self.finished = False
+        self.traffic_light = traffic_light
 
         self.position = route.nodes[0].position.copy()
         self.max_speed = speed
@@ -32,6 +34,12 @@ class Vehicle:
         if self.current_index >= len(self.route.path) - 1:
             self.finished = True
             return
+        
+        if self.get_traffic_light_state() in (LightState.NS_RED, LightState.EW_RED):
+            if self.is_facing_target(self.position, self.angle, self.traffic_light.pos):
+                # TODO: make vehicle stop at the node before the traffic light
+                print("placeholder")
+
 
         target = self.route.path[self.current_index + 1]
 
@@ -97,6 +105,35 @@ class Vehicle:
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
-
-
+    def get_traffic_light_state(self):
+        return self.traffic_light.state
     
+    
+    def angle_to_target(self, from_pos, to_pos):
+        dx = to_pos.x - from_pos.x
+        dy = to_pos.y - from_pos.y
+        return math.degrees(math.atan2(-dy, dx))
+
+
+    def normalize_angle(self, angle):
+        """
+        Normalize angle to range [-180, 180)
+        """
+        return (angle + 180) % 360 - 180
+
+
+    def is_facing_target(
+        self,
+        vehicle_pos,
+        vehicle_angle,   # sprite angle
+        target_pos,
+        tolerance_deg=15
+    ):
+        target_angle = self.angle_to_target(vehicle_pos, target_pos)
+
+        # Convert sprite rotation → true heading
+        heading = vehicle_angle + 90
+
+        diff = self.normalize_angle(target_angle - heading)
+
+        return abs(diff) <= tolerance_deg
