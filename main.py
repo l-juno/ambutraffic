@@ -91,8 +91,8 @@ def draw_nodes(screen, font):
     for node_id, pos in NODE_POS.items():
         pygame.draw.circle(screen, NODE_COLOR, (int(pos.x), int(pos.y)), NODE_RADIUS)
 
-        label = font.render(str(node_id), True, TEXT_COLOR)
-        screen.blit(label, (int(pos.x) , int(pos.y)))
+        # label = font.render(str(node_id), True, TEXT_COLOR)
+        # screen.blit(label, (int(pos.x) , int(pos.y)))
 
 
 
