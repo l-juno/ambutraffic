@@ -31,7 +31,7 @@ class Vehicle:
         if self.finished:
             return
 
-        if self.current_index >= len(self.route.nodes) - 1:
+        if self.current_index >= len(self.route.path) - 1:
             self.finished = True
             return
         
@@ -41,8 +41,10 @@ class Vehicle:
                 print("placeholder")
 
 
-        next_node = self.route.nodes[self.current_index + 1]
-        target = next_node.position
+        target = self.route.path[self.current_index + 1]
+
+        # next_node = self.route.nodes[self.current_index + 1]
+        # target = next_node.position
 
         move_vec = target - self.position
         distance = move_vec.length()
@@ -96,7 +98,9 @@ class Vehicle:
 
 
         target_angle = math.degrees(math.atan2(-forward.y, forward.x)) - 90
-        self.angle += (target_angle - self.angle) * 0.2
+
+        diff = (target_angle - self.angle + 180) % 360 - 180
+        self.angle += diff * 0.2
 
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
