@@ -2,10 +2,11 @@ import pygame
 from classes.traffic_light.light_state import LightState
 
 class TrafficLight:
-    def __init__(self, pos, initial_state):
+    def __init__(self, pos, initial_state, id):
         self.pos = pos
         self.state = initial_state
         self.timer = 0.0
+        self.id = id
 
         self.green_time = 180.0
         self.yellow_time = 120.0
