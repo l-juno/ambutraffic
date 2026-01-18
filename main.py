@@ -413,6 +413,7 @@ def main():
 
     # initial load
     vehicles = load_from_json(args.scenario, routes, traffic_lights)
+    ambulance_queue = []
 
     paused = False
     pause_font = pygame.font.SysFont(None, 36)
@@ -430,6 +431,7 @@ def main():
                 elif event.key == pygame.K_r:
                     paused = False
                     vehicles = load_from_json(args.scenario, routes, traffic_lights)
+                    ambulance_queue = [] 
 
         screen.fill(BG_COLOR)
         draw_roads(screen)
@@ -449,6 +451,15 @@ def main():
         for tl in traffic_lights:
             tl.draw(screen)
 
+        # add q
+        for vehicle in vehicles:
+            if vehicle.type == "ambulance":
+                if vehicle.isInAmbulanceZone and vehicle not in ambulance_queue:
+                    ambulance_queue.append(vehicle)
+                elif not vehicle.isInAmbulanceZone and vehicle in ambulance_queue:
+                    ambulance_queue.remove(vehicle)
+        ambulance_queue = [v for v in ambulance_queue if v in vehicles]
+
         for vehicle in vehicles:
             if vehicle.isInAmbulanceZone and vehicle.type == "ambulance":
                 pygame.draw.circle(
@@ -458,13 +469,14 @@ def main():
                     AMBULANCE_ZONE_RADIUS,
                     ZONE_WIDTH
                 )
-                for tl in traffic_lights:
-                    if tl == vehicle.traffic_light:
-                        tl.state = LightState.NS_GREEN if tl.id in (1, 2) else LightState.EW_GREEN
-                        tl.timer = 0.0
-                    else: 
-                        tl.state = LightState.NS_RED if tl.id in (1, 2) else LightState.EW_RED
-                        tl.timer = 0.0
+                if ambulance_queue and vehicle == ambulance_queue[0]:
+                    for tl in traffic_lights:
+                        if tl == vehicle.traffic_light:
+                            tl.state = LightState.NS_GREEN if tl.id in (1, 2) else LightState.EW_GREEN
+                            tl.timer = 0.0
+                        else: 
+                            tl.state = LightState.NS_RED if tl.id in (1, 2) else LightState.EW_RED
+                            tl.timer = 0.0
 
             elif vehicle.type == "ambulance":
                 if vehicle.traffic_light.id == 1:
