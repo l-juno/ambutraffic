@@ -375,25 +375,47 @@ def main():
     vehicles = load_from_json(args.scenario)
 
     running = True
+
+    # while running:
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             running = False
+
+    #     screen.fill(BG_COLOR)
+        
+        
+    #     draw_roads(screen)
+    #     draw_edges(screen, graph)
+    #     draw_nodes(screen, font)
+
+    #     for vehicle in vehicles:
+    #         screen.blit(vehicle.image, vehicle.rect)
+    #         vehicle.update(vehicles)
+
+
+    #     pygame.display.flip()
+    #     clock.tick(60)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         screen.fill(BG_COLOR)
-        
-        
+
         draw_roads(screen)
         draw_edges(screen, graph)
         draw_nodes(screen, font)
 
-        for vehicle in vehicles:
-            screen.blit(vehicle.image, vehicle.rect)
-            vehicle.update(vehicles)
+        vehicles = [v for v in vehicles if not v.finished]
 
+        for vehicle in vehicles:
+            vehicle.update(vehicles)
+            screen.blit(vehicle.image, vehicle.rect)
 
         pygame.display.flip()
         clock.tick(60)
+
 
     pygame.quit()
 
