@@ -70,6 +70,12 @@ class RoadGraph:
         self.adjacency[from_id].append(edge)
         self.edges.append(edge)
 
+    def get_edge(self, from_id, to_id):
+        for edge in self.adjacency[from_id]:
+            if edge.end.id == to_id:
+                return edge
+        return None
+
     def debug_print(self):
         print("=== ROAD GRAPH DEBUG ===")
         for node_id, edges in self.adjacency.items():
