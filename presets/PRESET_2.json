@@ -1,0 +1,29 @@
+{
+  "vehicles": [
+    {
+      "type": "car",
+      "position": [100, 100],
+      "speed": 10
+    },
+    {
+      "type": "car",
+      "position": [100, 200],
+      "speed": 10
+    },
+    {
+      "type": "car",
+      "position": [100, 300],
+      "speed": 10
+    },
+    {
+      "type": "car",
+      "position": [100, 400],
+      "speed": 10
+    },
+    {
+      "type": "car",
+      "position": [100, 500],
+      "speed": 10
+    }
+  ]
+}
