@@ -31,6 +31,8 @@ NODE_COLOR = (80, 160, 255)
 TEXT_COLOR = (255, 255, 255)
 YELLOW = (255, 200, 0)
 BLUE = (80, 160, 255)
+RED = (255, 80, 80)
+GREEN = (80, 255, 80)
 LINE_WIDTH = 2
 ZONE_COLOR = (255, 80, 80)
 AMBULANCE_ZONE_RADIUS = 300
@@ -366,7 +368,7 @@ def parse_args():
 def draw_detection_zone(screen):
     pygame.draw.circle(
         screen,
-        YELLOW,
+        RED,
         (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
         AMBULANCE_ZONE_RADIUS,
         ZONE_WIDTH
@@ -377,7 +379,7 @@ def draw_detection_zone(screen):
         YELLOW,
         (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
         TRAFFIC_ZONE_RADIUS,
-        ZONE_WIDTH
+        1
     )
 
 def main():
@@ -448,10 +450,10 @@ def main():
             tl.draw(screen)
 
         for vehicle in vehicles:
-            if vehicle.isInAmbulanceZone:
+            if vehicle.isInAmbulanceZone and vehicle.type == "ambulance":
                 pygame.draw.circle(
                     screen,
-                    ZONE_COLOR,
+                    GREEN,
                     (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
                     AMBULANCE_ZONE_RADIUS,
                     ZONE_WIDTH
