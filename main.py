@@ -33,7 +33,8 @@ YELLOW = (255, 200, 0)
 BLUE = (80, 160, 255)
 LINE_WIDTH = 2
 ZONE_COLOR = (255, 80, 80)
-ZONE_RADIUS = 300
+AMBULANCE_ZONE_RADIUS = 300
+TRAFFIC_ZONE_RADIUS = 200
 ZONE_WIDTH = 2
 
 
@@ -367,7 +368,15 @@ def draw_detection_zone(screen):
         screen,
         YELLOW,
         (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
-        ZONE_RADIUS,
+        AMBULANCE_ZONE_RADIUS,
+        ZONE_WIDTH
+    )
+
+    pygame.draw.circle(
+        screen,
+        YELLOW,
+        (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
+        TRAFFIC_ZONE_RADIUS,
         ZONE_WIDTH
     )
 
@@ -435,12 +444,12 @@ def main():
 
         for vehicle in vehicles[:]:
             vehicle.update(vehicles)
-            if vehicle.isInZone == True:
+            if vehicle.isInAmbulanceZone == True:
                 pygame.draw.circle(
                     screen,
                     ZONE_COLOR,
                     (SCREEN_WIDTH//2, SCREEN_HEIGHT//2),
-                    ZONE_RADIUS,
+                    AMBULANCE_ZONE_RADIUS,
                     ZONE_WIDTH
                 )
             if vehicle.finished:
