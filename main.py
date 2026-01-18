@@ -182,11 +182,31 @@ def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=1)
 
 #     # rectangle for arc is x1
 
+def draw_left_turn(screen, start: pygame.Vector2, end: pygame.Vector2, turn_type: str,
+                     width=5, color=(100, 220, 255)):
+    direction = end - start
+    direction.normalize_ip()
 
+    perp = pygame.Vector2(-direction.y, direction.x)
+    if turn_type == "right":
+        perp = -perp
 
+    # Control points for quadratic Bezier
+    ctrl1 = start + direction * 40 + perp * 30
 
-# def draw_edges(screen):
-#     draw_corner_arc(screen, getPos(1), getPos(2), BLUE, width=2)
+    steps = 30
+    for i in range(steps):
+        t = i / steps
+        t2 = 1 - t
+        pos = (t2 * t2 * start +
+               2 * t * t2 * ctrl1 +
+               t * t * end)
+        next_t = (i + 1) / steps
+        next_t2 = 1 - next_t
+        next_pos = (next_t2 * next_t2 * start +
+                    2 * next_t * next_t2 * ctrl1 +
+                    next_t * next_t * end)
+        pygame.draw.line(screen, color, pos, next_pos, width)
 
 def draw_edges(screen, graph):
     for edge_list in graph.adjacency.values():
@@ -194,16 +214,17 @@ def draw_edges(screen, graph):
             start_pos = edge.start.get_pos()
             end_pos = edge.end.get_pos()
 
-            if(edge.edge_type == "left" or edge.edge_type == "right"):
-                continue
+            if edge.edge_type in ("left"):
+                draw_left_turn(screen, start_pos, end_pos, edge.edge_type)
+            else:
+                pygame.draw.line(
+                    screen,
+                    BLUE,
+                    (int(start_pos.x), int(start_pos.y)),
+                    (int(end_pos.x), int(end_pos.y)),
+                    3
+                )
 
-            pygame.draw.line(
-                screen,
-                BLUE,
-                (int(start_pos.x), int(start_pos.y)),
-                (int(end_pos.x), int(end_pos.y)),
-                3
-            )
 
 
 def load_from_json(path):
