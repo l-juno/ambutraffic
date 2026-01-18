@@ -21,7 +21,7 @@ COLS = 1
 ROAD_COLOR = (50, 50, 50)
 BG_COLOR = (30, 30, 30)
 
-ROAD_THICKNESS = SCREEN_WIDTH // 15
+ROAD_THICKNESS = SCREEN_WIDTH // 10
 
 NODE_RADIUS = 4
 NODE_COLOR = (200, 0, 0)
@@ -201,17 +201,33 @@ def draw_left_turn(screen, start: pygame.Vector2, end: pygame.Vector2, turn_type
         pygame.draw.line(screen, BLUE, pos, next_pos, width)
 
 
+# def draw_arc(surface, center, radius, start_angle, stop_angle, color):
+#     x, y = int(center[0]), int(center[1])
+#     r = int(round(radius))
+
+#     start_angle = int(round(start_angle % 360))
+#     stop_angle  = int(round(stop_angle % 360))
+
+#     if start_angle == stop_angle:
+#         gfxdraw.circle(surface, x, y, r, color)
+#     else:
+#         gfxdraw.arc(surface, x, y, r, start_angle, stop_angle, color)
+
+
 def draw_arc(surface, center, radius, start_angle, stop_angle, color):
     x, y = int(center[0]), int(center[1])
     r = int(round(radius))
 
-    start_angle = int(round(start_angle % 360))
-    stop_angle  = int(round(stop_angle % 360))
-
-    if start_angle == stop_angle:
-        gfxdraw.circle(surface, x, y, r, color)
+    start_angle = int(round(start_angle)) % 360
+    stop_angle  = int(round(stop_angle)) % 360
+    if stop_angle < start_angle:
+        gfxdraw.arc(surface, x, y, r, start_angle, 359, color)
+        gfxdraw.arc(surface, x, y, r, 0, stop_angle, color)
+    elif stop_angle == start_angle:
+        gfxdraw.arc(surface, x, y, r, start_angle, (start_angle + 1) % 360, color)
     else:
         gfxdraw.arc(surface, x, y, r, start_angle, stop_angle, color)
+
 
 # def draw_right_turn(screen, color, start_pos, end_pos, radius, width=LINE_WIDTH):
 #     direction = get_right_turn_direction(start_pos, end_pos)
@@ -373,7 +389,8 @@ def main():
 
         for vehicle in vehicles:
             screen.blit(vehicle.image, vehicle.rect)
-            vehicle.update()
+            vehicle.update(vehicles)
+
 
         pygame.display.flip()
         clock.tick(60)
