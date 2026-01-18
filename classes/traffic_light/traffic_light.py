@@ -8,9 +8,9 @@ class TrafficLight:
         self.timer = 0.0
         self.id = id
 
-        self.green_time = 180.0
-        self.yellow_time = 120.0
-        self.red_time = 300.0
+        self.green_time = 120.0
+        self.yellow_time = 80.0
+        self.red_time = 200.0
 
     def update(self):
         self.timer += 1
