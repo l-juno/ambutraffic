@@ -17,8 +17,8 @@ class RoadGraph:
         # Create edges to connect nodes at an intersection
         # Straight connections
         self.add_edge(0, 5, edge_type="straight") # from N_in to S_out
-        self.add_edge(4, 1, edge_type="straight") # from S_in to N_out
         self.add_edge(2, 7, edge_type="straight") # from E_in to W_out
+        self.add_edge(4, 1, edge_type="straight") # from S_in to N_out
         self.add_edge(6, 3, edge_type="straight") # from W_in to E_out
 
         # Right turns
@@ -28,22 +28,37 @@ class RoadGraph:
         self.add_edge(6, 5, edge_type="right") # from W_in to S_out
 
         # Left turns
-        self.add_edge(0, 3, edge_type="left") # from N_in to E_out
-        self.add_edge(2, 5, edge_type="left") # from E_in to S_out
-        self.add_edge(4, 7, edge_type="left") # from S_in to W_out
-        self.add_edge(6, 1, edge_type="left") # from W_in to N_out
+        self.add_edge(8, 24, edge_type="approach") # merge to left turn lane
+        self.add_edge(10, 25, edge_type="approach")
+        self.add_edge(12, 26, edge_type="approach")
+        self.add_edge(14, 27, edge_type="approach")
+
+        self.add_edge(24, 3, edge_type="left") # from N_in to E_out
+        self.add_edge(25, 5, edge_type="left") # from E_in to S_out
+        self.add_edge(26, 7, edge_type="left") # from S_in to W_out
+        self.add_edge(27, 1, edge_type="left") # from W_in to N_out
 
         # Road → Entry
-        self.add_edge(8, 0, edge_type="approach")
+        self.add_edge(16, 8, edge_type="approach")
+        self.add_edge(18, 10, edge_type="approach")
+        self.add_edge(20, 12, edge_type="approach")
+        self.add_edge(22, 14, edge_type="approach")
+
+        self.add_edge(8, 0, edge_type="approach") 
         self.add_edge(12, 4, edge_type="approach")
-        self.add_edge(11, 3, edge_type="approach")
-        self.add_edge(15, 7, edge_type="approach")
+        self.add_edge(14, 6, edge_type="approach")
+        self.add_edge(10, 2, edge_type="approach")
 
         # Exit → Road
         self.add_edge(1, 9, edge_type="exit")
         self.add_edge(5, 13, edge_type="exit")
-        self.add_edge(6, 14, edge_type="exit")
-        self.add_edge(2, 10, edge_type="exit")
+        self.add_edge(3, 11, edge_type="exit")
+        self.add_edge(7, 15, edge_type="exit")
+
+        self.add_edge(9, 17, edge_type="exit")
+        self.add_edge(11, 19, edge_type="exit")
+        self.add_edge(13, 21, edge_type="exit")
+        self.add_edge(15, 23, edge_type="exit")
 
 
     def add_node(self, node):
