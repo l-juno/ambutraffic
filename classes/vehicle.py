@@ -88,7 +88,9 @@ class Vehicle:
 
 
         target_angle = math.degrees(math.atan2(-forward.y, forward.x)) - 90
-        self.angle += (target_angle - self.angle) * 0.2
+
+        diff = (target_angle - self.angle + 180) % 360 - 180
+        self.angle += diff * 0.2
 
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
