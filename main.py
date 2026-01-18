@@ -146,8 +146,8 @@ def draw_vehicle_stats(screen, vehicles):
     font = pygame.font.SysFont(None, 18)
 
     line_height = 18
-    x = 10
-    y = screen.get_height() - line_height - 320
+    x = 560
+    y = 460
 
     for i, v in enumerate(vehicles):
         text_str = (
