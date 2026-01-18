@@ -381,6 +381,11 @@ def main():
             screen.blit(vehicle.image, vehicle.rect)
             vehicle.update()
 
+        for vehicle in vehicles[:]:
+            if vehicle.finished:
+                vehicles.remove(vehicle)
+
+
         pygame.display.flip()
         clock.tick(60)
 
