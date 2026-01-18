@@ -501,6 +501,14 @@ def main():
         "Add Ambulance", (180, 60, 60), (220, 80, 80)
     )
 
+    toggle_lines_btn = Button(
+        button_margin + 2* (button_margin + button_width + button_margin), button_y,
+        button_width + 20, button_height,
+        "Show Lines", (60, 120, 180), (80, 160, 220)
+    )
+    show_lines = True
+
+
     running = True
     while running:
         mouse_pos = pygame.mouse.get_pos()
@@ -519,6 +527,11 @@ def main():
                 new_vehicle = spawn_vehicle("ambulance", routes, traffic_lights)
                 vehicles.append(new_vehicle)
 
+            elif toggle_lines_btn.is_clicked(event):
+                show_lines = not show_lines
+                toggle_lines_btn.text = "Hide Lines" if show_lines else "Show Lines"
+
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     paused = not paused
@@ -530,9 +543,10 @@ def main():
 
         screen.fill(BG_COLOR)
         draw_roads(screen)
-        draw_edges(screen, graph)
-        draw_detection_zone(screen)
-        draw_nodes(screen, font)
+        if show_lines:
+            draw_edges(screen, graph)
+            draw_nodes(screen, font)
+            draw_detection_zone(screen)
         draw_vehicle_stats(screen, vehicles)
 
         if not paused:
@@ -599,7 +613,7 @@ def main():
             tl.draw(screen)
 
         # Draw ambulance zone indicator if ambulance is present
-        if ambulance_in_zone:
+        if ambulance_in_zone and show_lines:
             pygame.draw.circle(
                 screen,
                 GREEN,
@@ -623,16 +637,12 @@ def main():
         # Draw UI buttons
         add_car_btn.draw(screen)
         add_ambulance_btn.draw(screen)
+        toggle_lines_btn.draw(screen)
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
