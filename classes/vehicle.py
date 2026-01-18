@@ -69,7 +69,15 @@ class Vehicle:
         self.original_image = pygame.image.load(
             f"assets/{type}.png"
         ).convert_alpha()
-        # Apply initial rotation to match starting direction
+
+        # Ambulance siren
+        if self.type == "ambulance":
+            self.siren_image = pygame.image.load("assets/siren.png").convert_alpha()
+            self.siren_timer = 0.0
+            self.siren_on = True
+            self.siren_offset = pygame.Vector2(0, 5)
+            
+        # # Apply initial rotation to match starting direction
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.position)
     
