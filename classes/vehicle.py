@@ -22,7 +22,7 @@ class Vehicle:
         self.angle = 0
 
         # spacing / safety
-        self.LANE_WIDTH = 18
+        self.LANE_WIDTH = 7
         self.STOP_GAP = 25
         self.SAFE_GAP = 50
         self.MIN_SPEED = 0.15
@@ -82,6 +82,9 @@ class Vehicle:
             if other is self or other.finished:
                 continue
 
+            # if other.route.id != self.route.id:
+            #     continue
+
             to_other = other.position - self.position
             d = to_other.length()
 
@@ -100,10 +103,17 @@ class Vehicle:
 
         speed_now = self.max_speed
 
-        if self.isInTrafficZone:
-            speed_now = self.max_speed * 0.5
+        # if self.isInTrafficZone:
+        #     if self.get_traffic_light_state() in (LightState.NS_RED, LightState.EW_RED):
+        #         if self.is_facing_target(self.position, self.angle, self.traffic_light.pos):
+        #                 speed_now = self.max_speed * 0.5
 
-        buffer = 20
+        if self.get_traffic_light_state() in (LightState.NS_RED, LightState.EW_RED):
+                if self.is_facing_target(self.position, self.angle, self.traffic_light.pos):
+                    if self.current_index < 2 and self.isInTrafficZone:
+                        speed_now = self.max_speed * 0.5
+
+        buffer = 5
         stop_dist = self.STOP_GAP + buffer
         safe_dist = self.SAFE_GAP + buffer
 
@@ -154,7 +164,7 @@ class Vehicle:
         vehicle_pos,
         vehicle_angle,   # sprite angle
         target_pos,
-        tolerance_deg=15
+        tolerance_deg=20
     ):
         target_angle = self.angle_to_target(vehicle_pos, target_pos)
 
