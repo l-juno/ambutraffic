@@ -417,7 +417,6 @@ def main():
             tl.update()
         
         for vehicle in vehicles:
-            vehicle.update(vehicles)
             screen.blit(vehicle.image, vehicle.rect)
             vehicle.update()
 
