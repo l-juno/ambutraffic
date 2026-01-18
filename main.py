@@ -397,16 +397,16 @@ def main():
 
     traffic_lights = []
     traffic_lights.append(
-        TrafficLight(pygame.Vector2(NODE_POS[3][0], NODE_POS[3][1]), LightState.EW_GREEN)
+        TrafficLight(pygame.Vector2(NODE_POS[3][0], NODE_POS[3][1]), LightState.EW_GREEN, 3)
     )
     traffic_lights.append(
-        TrafficLight(pygame.Vector2(NODE_POS[7][0], NODE_POS[7][1]), LightState.EW_GREEN)
+        TrafficLight(pygame.Vector2(NODE_POS[7][0], NODE_POS[7][1]), LightState.EW_GREEN, 0)
     )
     traffic_lights.append(
-        TrafficLight(pygame.Vector2(NODE_POS[1][0], NODE_POS[1][1]), LightState.NS_RED)
+        TrafficLight(pygame.Vector2(NODE_POS[1][0], NODE_POS[1][1]), LightState.NS_RED, 1)
     )
     traffic_lights.append(
-        TrafficLight(pygame.Vector2(NODE_POS[5][0], NODE_POS[5][1]), LightState.NS_RED)
+        TrafficLight(pygame.Vector2(NODE_POS[5][0], NODE_POS[5][1]), LightState.NS_RED, 2)
     )
 
     routes = build_routes(graph)
@@ -458,6 +458,31 @@ def main():
                     AMBULANCE_ZONE_RADIUS,
                     ZONE_WIDTH
                 )
+                for tl in traffic_lights:
+                    if tl == vehicle.traffic_light:
+                        tl.state = LightState.NS_GREEN if tl.id in (1, 2) else LightState.EW_GREEN
+                        tl.timer = 0.0
+                    else: 
+                        tl.state = LightState.NS_RED if tl.id in (1, 2) else LightState.EW_RED
+                        tl.timer = 0.0
+
+            elif vehicle.type == "ambulance":
+                if vehicle.traffic_light.id == 1:
+                    traffic_lights[3].state = vehicle.traffic_light.state
+                    traffic_lights[3].timer = vehicle.traffic_light.timer
+
+                elif vehicle.traffic_light.id == 2:
+                    traffic_lights[2].state = vehicle.traffic_light.state
+                    traffic_lights[2].timer = vehicle.traffic_light.timer
+                
+                elif vehicle.traffic_light.id == 0:
+                    traffic_lights[0].state = vehicle.traffic_light.state
+                    traffic_lights[0].timer = vehicle.traffic_light.timer
+                
+                else:
+                    traffic_lights[1].state = vehicle.traffic_light.state
+                    traffic_lights[1].timer = vehicle.traffic_light.timer
+        
             screen.blit(vehicle.image, vehicle.rect)
 
         if paused:
