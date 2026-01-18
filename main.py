@@ -627,6 +627,7 @@ def main():
         draw_vehicle_stats(screen, vehicles)
 
         if not paused:
+            # Use traffic_lights[0] as the timer source for cycling
             traffic_lights[0].update()
 
             # Update all vehicles
@@ -634,6 +635,9 @@ def main():
                 vehicle.update(vehicles)
                 if vehicle.finished:
                     vehicles.remove(vehicle)
+        
+        # Save the cycle phase from master before we modify states for display
+        cycle_phase = traffic_lights[0].state
 
         for vehicle in vehicles:
             if vehicle.type == "ambulance":
@@ -658,36 +662,41 @@ def main():
                     # Give red to other directions
                     tl.state = LightState.NS_RED if tl.id in (1, 2) else LightState.EW_RED
         else:
-            # Sync all lights based on master light (traffic_lights[0])
-            master_state = traffic_lights[0].state
+            # Sync all lights based on cycle phase
+            # cycle_phase cycles: EW_GREEN → EW_YELLOW → EW_RED → NS_GREEN → NS_YELLOW → NS_RED
             
-            # E/W pair (traffic_lights[0] and [1]) - same state
-            traffic_lights[1].state = master_state
-            traffic_lights[1].timer = traffic_lights[0].timer
-            
-            # N/S pair (traffic_lights[2] and [3]) - opposite state
-            # When E/W is green/yellow, N/S is red
-            # When E/W is red, N/S is green
-            if master_state == LightState.EW_GREEN:
-                opposite_state = LightState.NS_RED
-            elif master_state == LightState.EW_YELLOW:
-                opposite_state = LightState.NS_RED
-            elif master_state == LightState.EW_RED:
-                opposite_state = LightState.NS_GREEN
-            elif master_state == LightState.NS_GREEN:
-                opposite_state = LightState.EW_RED
-            elif master_state == LightState.NS_YELLOW:
-                opposite_state = LightState.EW_RED
+            # Determine what each pair should show based on current phase
+            if cycle_phase == LightState.EW_GREEN:
+                ew_state = LightState.EW_GREEN
+                ns_state = LightState.NS_RED
+            elif cycle_phase == LightState.EW_YELLOW:
+                ew_state = LightState.EW_YELLOW
+                ns_state = LightState.NS_RED
+            elif cycle_phase == LightState.EW_RED:
+                ew_state = LightState.EW_RED
+                ns_state = LightState.NS_GREEN
+            elif cycle_phase == LightState.NS_GREEN:
+                ew_state = LightState.EW_RED
+                ns_state = LightState.NS_GREEN
+            elif cycle_phase == LightState.NS_YELLOW:
+                ew_state = LightState.EW_RED
+                ns_state = LightState.NS_YELLOW
             else:  # NS_RED
-                opposite_state = LightState.EW_GREEN
+                ew_state = LightState.EW_GREEN
+                ns_state = LightState.NS_RED
             
-            traffic_lights[2].state = opposite_state
-            traffic_lights[3].state = opposite_state
-            traffic_lights[2].timer = traffic_lights[0].timer
-            traffic_lights[3].timer = traffic_lights[0].timer
+            # Set ALL lights for display (including [0])
+            traffic_lights[0].state = ew_state
+            traffic_lights[1].state = ew_state
+            traffic_lights[2].state = ns_state
+            traffic_lights[3].state = ns_state
 
         for tl in traffic_lights:
             tl.draw(screen)
+
+        # Restore the cycle phase to master light so it can continue cycling
+        if not ambulance_in_zone:
+            traffic_lights[0].state = cycle_phase
 
         # Draw ambulance zone indicator if ambulance is present
         if ambulance_in_zone and show_lines:
