@@ -4,6 +4,7 @@ import argparse
 import math
 
 from classes.vehicle import Vehicle
+from classes.graph.graph import RoadGraph
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
@@ -162,6 +163,20 @@ def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=4)
 
 # def draw_edges(screen):
 #     draw_corner_arc(screen, getPos(1), getPos(2), BLUE, width=2)
+
+def draw_edges(screen, graph):
+    for edge_list in graph.adjacency.values():
+        for edge in edge_list:
+            start_pos = edge.start.get_pos()
+            end_pos = edge.end.get_pos()
+
+            pygame.draw.line(
+                screen,
+                BLUE,
+                (int(start_pos.x), int(start_pos.y)),
+                (int(end_pos.x), int(end_pos.y)),
+                3
+            )
 
 
 ROAD_THICKNESS = SCREEN_WIDTH // 5
@@ -344,6 +359,8 @@ def main():
     font = pygame.font.SysFont(None, 24)
     global NODE_POS
     NODE_POS = build_node_positions()
+    graph = RoadGraph(NODE_POS)
+    graph.debug_print()
 
     running = True
     while running:
@@ -355,7 +372,7 @@ def main():
         
         
         draw_roads(screen)
-        # draw_edges(screen)
+        draw_edges(screen, graph)
         draw_nodes(screen, font)
         
         for vehicle in vehicles:
