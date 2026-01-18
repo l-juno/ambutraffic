@@ -12,6 +12,7 @@ class Vehicle:
     def __init__(self, route, speed, type: str, traffic_light):
         self.route = route
         self.current_index = 0
+        self.type = type
         self.finished = False
         self.traffic_light = traffic_light
 
