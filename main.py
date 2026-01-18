@@ -170,6 +170,43 @@ def draw_dashed_line(screen, color, start, end, dash_length=20, gap=15, width=1)
         dist += dash_length + gap
 
 
+
+
+# def draw_corner_arc(screen, p_start: pygame.Vector2, p_end: pygame.Vector2, turn_type, width=2):
+#     # Calculate center of the arc
+
+#     # have right turn and left turn radians
+#     # right turn: (pi to pi/2)
+#     # left turn: (0 to pi/2)
+#     # straight: just line
+
+#     # rectangle for arc is x1
+
+def draw_left_turn(screen, start: pygame.Vector2, end: pygame.Vector2, turn_type: str,
+                     width=5, color=(100, 220, 255)):
+    direction = end - start
+    direction.normalize_ip()
+
+    perp = pygame.Vector2(-direction.y, direction.x)
+    if turn_type == "right":
+        perp = -perp
+
+    # Control points for quadratic Bezier
+    ctrl1 = start + direction * 40 + perp * 30
+
+    steps = 30
+    for i in range(steps):
+        t = i / steps
+        t2 = 1 - t
+        pos = (t2 * t2 * start +
+               2 * t * t2 * ctrl1 +
+               t * t * end)
+        next_t = (i + 1) / steps
+        next_t2 = 1 - next_t
+        next_pos = (next_t2 * next_t2 * start +
+                    2 * next_t * next_t2 * ctrl1 +
+                    next_t * next_t * end)
+        pygame.draw.line(screen, color, pos, next_pos, width)
 def draw_right_turn(screen, color, start_pos, end_pos, radius, width=3):
     direction = get_right_turn_direction(start_pos, end_pos)
 
@@ -223,6 +260,16 @@ def draw_edges(screen, graph):
             start_pos = edge.start.get_pos()
             end_pos = edge.end.get_pos()
 
+            if edge.edge_type in ("left"):
+                draw_left_turn(screen, start_pos, end_pos, edge.edge_type)
+            else:
+                pygame.draw.line(
+                    screen,
+                    BLUE,
+                    (int(start_pos.x), int(start_pos.y)),
+                    (int(end_pos.x), int(end_pos.y)),
+                    3
+                )
 
             # pygame.draw.line(
             #     screen,
@@ -242,6 +289,7 @@ def draw_edges(screen, graph):
             radius = abs(end_pos.x - start_pos.x)  # works because the turn is a quarter circle
 
             draw_right_turn(screen, BLUE, start_pos, end_pos, radius, width=3)
+
 
 
 def load_from_json(path):
