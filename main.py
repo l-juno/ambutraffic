@@ -58,13 +58,13 @@ def build_node_positions():
         14: pygame.Vector2(halfX - (4*halfRoad+offset), halfY + offset),
         15: pygame.Vector2(halfX - (4*halfRoad+offset), halfY - offset),
 
-        16: pygame.Vector2(halfX - offset,           0),
+        16: pygame.Vector2(halfX - offset,           0 - offset),
         17: pygame.Vector2(halfX + offset,           0 - offset),
-        18: pygame.Vector2(SCREEN_WIDTH, halfY - offset),
+        18: pygame.Vector2(SCREEN_WIDTH + offset, halfY - offset),
         19: pygame.Vector2(SCREEN_WIDTH + offset, halfY + offset),
-        20: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT),
+        20: pygame.Vector2(halfX + offset,           SCREEN_HEIGHT + offset),
         21: pygame.Vector2(halfX - offset,           SCREEN_HEIGHT + offset),
-        22: pygame.Vector2(0, halfY + offset),
+        22: pygame.Vector2(0 - offset, halfY + offset),
         23: pygame.Vector2(0 - offset, halfY - offset),
 
         24: pygame.Vector2(halfX,           halfY - (halfRoad + offset)),
