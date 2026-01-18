@@ -328,7 +328,7 @@ def draw_edges(screen, graph):
                     LINE_WIDTH
                 )
 
-def load_from_json(path, routes):
+def load_from_json(path, routes, traffic_lights):
     with open(path, "r") as f:
         data = json.load(f)
 
@@ -337,12 +337,13 @@ def load_from_json(path, routes):
         route_id = v["route"]
         speed = v["speed"]
         vehicle_type = v.get("type")
+        traffic_light_index = v.get("traffic_light_index")
 
         if route_id not in routes:
             raise ValueError(f"Unknown route '{route_id}' in scenario file")
 
         route = routes[route_id]
-        vehicles.append(Vehicle(route, speed, vehicle_type))
+        vehicles.append(Vehicle(route, speed, vehicle_type, traffic_lights[traffic_light_index]))
 
     return vehicles
 
@@ -369,15 +370,15 @@ def main():
     graph.debug_print()
     
     traffic_lights = []
-    traffic_lights.append(TrafficLight((NODE_POS[3][0],NODE_POS[3][1]), LightState.EW_RED))
-    traffic_lights.append(TrafficLight((NODE_POS[7][0],NODE_POS[7][1]), LightState.EW_RED))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[3][0],NODE_POS[3][1]), LightState.EW_GREEN))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[7][0],NODE_POS[7][1]), LightState.EW_GREEN))
     
-    traffic_lights.append(TrafficLight((NODE_POS[1][0],NODE_POS[1][1]), LightState.NS_GREEN))
-    traffic_lights.append(TrafficLight((NODE_POS[5][0],NODE_POS[5][1]), LightState.NS_GREEN))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[1][0],NODE_POS[1][1]), LightState.NS_RED))
+    traffic_lights.append(TrafficLight(pygame.Vector2(NODE_POS[5][0],NODE_POS[5][1]), LightState.NS_RED))
     
     # graph.debug_print()
     routes = build_routes(graph)
-    vehicles = load_from_json(args.scenario, routes)
+    vehicles = load_from_json(args.scenario, routes, traffic_lights)
 
     running = True
 

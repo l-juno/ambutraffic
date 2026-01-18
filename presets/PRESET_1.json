@@ -3,22 +3,8 @@
     {
       "type": "ambulance",
       "route": "N_left",
-      "speed": 2
-    },
-    {
-      "type": "car",
-      "route": "W_straight",
-      "speed": 2
-    },
-    {
-      "type": "car",
-      "route": "S_right",
-      "speed": 2
-    },
-    {
-      "type": "car",
-      "route": "E_right",
-      "speed": 2
+      "speed": 2,
+      "traffic_light_index": 3
     }
   ]
 }
