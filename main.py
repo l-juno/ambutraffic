@@ -597,6 +597,13 @@ def main():
                 (255, 255, 255)
             )
             screen.blit(text, (20, 20))
+        else:
+            text = pause_font.render(
+                "Press SPACE to pause, R to reset scenario",
+                True,
+                (255, 255, 255)
+            )
+            screen.blit(text, (20, 20))
 
         # Draw UI buttons
         add_car_btn.draw(screen)
