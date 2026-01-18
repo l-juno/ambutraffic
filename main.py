@@ -353,11 +353,13 @@ def main():
 
         screen.fill(BG_COLOR)
         
-        for vehicle in vehicles:
-            screen.blit(vehicle.image, vehicle.rect)
+        
         draw_roads(screen)
         # draw_edges(screen)
         draw_nodes(screen, font)
+        
+        for vehicle in vehicles:
+            screen.blit(vehicle.image, vehicle.rect)
 
         pygame.display.flip()
         clock.tick(60)
